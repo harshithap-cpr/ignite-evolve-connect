@@ -1,19 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Hackathons", href: "#hackathons" },
-  { label: "Mentors", href: "#mentors" },
-  { label: "Courses", href: "#courses" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/#features" },
+  { label: "Hackathons", href: "/hackathons" },
+  { label: "Mentors", href: "/mentors" },
+  { label: "Courses", href: "/courses" },
+  { label: "Pricing", href: "/#pricing" },
 ];
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out");
+    navigate("/");
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
@@ -27,26 +37,51 @@ const Navbar = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-muted-foreground hover:text-foreground font-medium transition-colors text-sm"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) =>
+            link.href.startsWith("/") && !link.href.startsWith("/#") ? (
+              <Link
+                key={link.label}
+                to={link.href}
+                className="text-muted-foreground hover:text-foreground font-medium transition-colors text-sm"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-muted-foreground hover:text-foreground font-medium transition-colors text-sm"
+              >
+                {link.label}
+              </a>
+            )
+          )}
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm">Log in</Button>
-          <Button variant="hero" size="sm">Get Started</Button>
+          {user ? (
+            <>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="w-4 h-4" />
+                <span className="max-w-[120px] truncate">{user.email}</span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-1" /> Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/auth">Log in</Link>
+              </Button>
+              <Button variant="hero" size="sm" asChild>
+                <Link to="/auth">Get Started</Link>
+              </Button>
+            </>
+          )}
         </div>
 
-        <button
-          className="md:hidden p-2 text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
+        <button className="md:hidden p-2 text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
@@ -60,19 +95,42 @@ const Navbar = () => {
             className="md:hidden bg-background border-b border-border"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-muted-foreground hover:text-foreground font-medium py-2"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map((link) =>
+                link.href.startsWith("/") && !link.href.startsWith("/#") ? (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    className="text-muted-foreground hover:text-foreground font-medium py-2"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className="text-muted-foreground hover:text-foreground font-medium py-2"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </a>
+                )
+              )}
               <div className="flex gap-3 pt-2">
-                <Button variant="ghost" size="sm" className="flex-1">Log in</Button>
-                <Button variant="hero" size="sm" className="flex-1">Get Started</Button>
+                {user ? (
+                  <Button variant="ghost" size="sm" className="flex-1" onClick={handleSignOut}>
+                    Sign Out
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" className="flex-1" asChild>
+                      <Link to="/auth">Log in</Link>
+                    </Button>
+                    <Button variant="hero" size="sm" className="flex-1" asChild>
+                      <Link to="/auth">Get Started</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
