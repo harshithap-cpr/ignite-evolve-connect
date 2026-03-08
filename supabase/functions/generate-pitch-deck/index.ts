@@ -179,6 +179,8 @@ ANALYSIS DATA:
 
     const pitchDeck = JSON.parse(toolCall.function.arguments);
 
+    await recordUsage(auth.supabase, auth.userId, "pitch_deck_generation");
+
     return new Response(JSON.stringify(pitchDeck), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
