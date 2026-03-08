@@ -406,7 +406,39 @@ const ProblemStatementWizard = () => {
                 )}
               </div>
 
-
+              {/* Upgrade CTA for free users */}
+              {!isPaid && (
+                <div className="bg-gradient-to-br from-primary/10 via-card to-spark-amber/10 rounded-2xl border border-primary/20 p-6 md:p-8 text-center space-y-4">
+                  <div className="flex justify-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Lock className="w-6 h-6 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="font-display font-bold text-xl text-card-foreground">Unlock Full Analysis</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Get detailed market scores, ethical & novelty analysis, competitor breakdown, target customers, strengths, improvements, and actionable next steps.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
+                    {["Market Scores", "Ethics Report", "Novelty Check", "Competitor Map", "Target Customers", "Pitch Deck"].map((f) => (
+                      <span key={f} className="flex items-center gap-1 bg-secondary/50 px-2 py-1 rounded-full">
+                        <Lock className="w-3 h-3" /> {f}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex justify-center gap-3">
+                    {upgradePlans.map((p) => (
+                      <Button
+                        key={p.name}
+                        variant={p.name === "Pro" ? "hero" : "outline"}
+                        onClick={() => setSelectedPlan(p)}
+                        className="min-w-[140px]"
+                      >
+                        <Crown className="w-4 h-4 mr-1" /> {p.name} {p.price}{p.period}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Detailed sections - only for paid users */}
               {isPaid && (
