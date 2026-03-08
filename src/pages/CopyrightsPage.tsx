@@ -152,6 +152,7 @@ const CopyrightsPage = () => {
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          <PaywallBanner feature="copyright filing" remainingFree={remainingFree} canUse={canUse} isPaid={isPaid} />
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold font-display mb-2">
