@@ -2,3 +2,6 @@ project_id = "aklbfplmacsyjiglrqqs"
 
 [functions.analyze-idea]
 verify_jwt = false
+
+[functions.generate-pitch-deck]
+verify_jwt = false
