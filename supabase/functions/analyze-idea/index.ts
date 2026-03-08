@@ -32,7 +32,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a startup analyst AI. Given a problem statement and proposed solution, analyze and return structured data. Be specific and realistic with numbers and names.`,
+            content: `You are a startup analyst AI. Given a problem statement and proposed solution, analyze and return structured data. Be specific and realistic with numbers and names. Also evaluate the ethical implications and novelty/originality of the idea.`,
           },
           {
             role: "user",
@@ -42,7 +42,7 @@ PROBLEM: ${problem_statement}
 
 SOLUTION: ${proposed_solution}
 
-Provide a detailed analysis.`,
+Provide a detailed analysis including ethical considerations and novelty assessment.`,
           },
         ],
         tools: [
@@ -50,7 +50,7 @@ Provide a detailed analysis.`,
             type: "function",
             function: {
               name: "provide_analysis",
-              description: "Provide structured startup idea analysis",
+              description: "Provide structured startup idea analysis with ethical and novelty checks",
               parameters: {
                 type: "object",
                 properties: {
@@ -102,9 +102,42 @@ Provide a detailed analysis.`,
                     type: "number",
                     description: "Market potential score 1-10",
                   },
+                  ethical_score: {
+                    type: "number",
+                    description: "Ethical score 1-10. Evaluates data privacy, social impact, fairness, environmental impact, and potential for misuse.",
+                  },
+                  novelty_score: {
+                    type: "number",
+                    description: "Novelty/originality score 1-10. How unique and original is this idea compared to existing solutions.",
+                  },
                   overall_score: {
                     type: "number",
                     description: "Overall score 1-10",
+                  },
+                  ethical_analysis: {
+                    type: "object",
+                    properties: {
+                      privacy_concern: { type: "string", description: "Data privacy concerns and how they can be addressed" },
+                      social_impact: { type: "string", description: "Positive or negative social impact assessment" },
+                      fairness: { type: "string", description: "Fairness and bias considerations" },
+                      environmental_impact: { type: "string", description: "Environmental sustainability assessment" },
+                      risk_level: { type: "string", enum: ["Low", "Medium", "High"], description: "Overall ethical risk level" },
+                    },
+                    required: ["privacy_concern", "social_impact", "fairness", "environmental_impact", "risk_level"],
+                    additionalProperties: false,
+                    description: "Detailed ethical analysis of the idea",
+                  },
+                  novelty_analysis: {
+                    type: "object",
+                    properties: {
+                      uniqueness: { type: "string", description: "What makes this idea unique compared to existing solutions" },
+                      prior_art: { type: "string", description: "Similar existing solutions or prior art" },
+                      differentiator: { type: "string", description: "Key differentiating factor" },
+                      patentability: { type: "string", enum: ["High", "Medium", "Low"], description: "Potential for patent protection" },
+                    },
+                    required: ["uniqueness", "prior_art", "differentiator", "patentability"],
+                    additionalProperties: false,
+                    description: "Detailed novelty and originality analysis",
                   },
                   strengths: {
                     type: "array",
@@ -124,6 +157,7 @@ Provide a detailed analysis.`,
                 required: [
                   "market_value", "market_growth", "target_customers", "competing_apps",
                   "innovation_score", "feasibility_score", "market_score", "overall_score",
+                  "ethical_score", "novelty_score", "ethical_analysis", "novelty_analysis",
                   "strengths", "improvements", "verdict",
                 ],
                 additionalProperties: false,
