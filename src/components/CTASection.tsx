@@ -19,7 +19,7 @@ const CTASection = () => {
               Ready to Spark Your Next Big Idea?
             </h2>
             <p className="text-primary-foreground/80 text-lg mb-8 max-w-lg mx-auto">
-              Join thousands of innovators, mentors, and creators building the future together on Spark Guidance.
+              Join thousands of innovators, mentors, and creators building the future together on Innvo Spark Guidance.
             </p>
             <Button
               variant="outline"
