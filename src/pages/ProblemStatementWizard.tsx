@@ -338,70 +338,77 @@ const ProblemStatementWizard = () => {
                 </motion.div>
               )}
 
-              {/* Payment Dialog */}
-              <Dialog open={!!selectedPlan} onOpenChange={(open) => { if (!open) setSelectedPlan(null); }}>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-xl">
-                      <QrCode className="w-5 h-5 text-primary" /> Pay for {selectedPlan?.name} Plan
-                    </DialogTitle>
-                    <DialogDescription>
-                      Scan the QR code or copy the UPI ID to pay <span className="font-semibold text-foreground">{selectedPlan?.price}{selectedPlan?.period}</span>
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex flex-col items-center gap-5 py-4">
-                    <div className="bg-background border border-border rounded-xl p-4 shadow-sm">
-                      <img src={qrCodeUrl} alt="UPI QR Code" width={220} height={220} className="rounded-lg" />
+              {/* Inline Payment Section */}
+              {selectedPlan && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-card rounded-2xl border-2 border-primary/30 p-6 md:p-8 space-y-5"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="w-5 h-5 text-primary" />
+                      <h3 className="font-display font-bold text-lg text-card-foreground">
+                        Pay for {selectedPlan.name} Plan — {selectedPlan.price}{selectedPlan.period}
+                      </h3>
                     </div>
-                    <div className="w-full flex items-center gap-2 bg-muted rounded-lg px-4 py-3">
-                      <span className="text-sm text-muted-foreground">UPI ID:</span>
-                      <span className="font-mono font-semibold text-foreground flex-1">{UPI_ID}</span>
-                      <Button variant="ghost" size="icon" onClick={copyUpiId} className="shrink-0">
-                        {copied ? <CheckCircle className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
-                      </Button>
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedPlan(null)}>← Back</Button>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="bg-background border border-border rounded-xl p-4 shadow-sm shrink-0">
+                      <img src={qrCodeUrl} alt="UPI QR Code" width={200} height={200} className="rounded-lg" />
                     </div>
-                    <a href={upiPaymentLink} className="w-full">
-                      <Button variant="hero" className="w-full">
-                        <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan?.price} via UPI App
-                      </Button>
-                    </a>
-                    <div className="w-full border-t border-border pt-4 space-y-3">
-                      <p className="text-sm font-semibold text-card-foreground text-center">After payment, submit your transaction ID below:</p>
-                      <Input
-                        placeholder="Enter UPI Transaction ID"
-                        value={txnId}
-                        onChange={(e) => setTxnId(e.target.value)}
-                      />
-                      <Button
-                        variant="hero"
-                        className="w-full"
-                        disabled={!txnId.trim() || txnSubmitting}
-                        onClick={async () => {
-                          if (!user) { toast.error("Please sign in"); return; }
-                          setTxnSubmitting(true);
-                          const { error } = await supabase.from("subscriptions").insert({
-                            user_id: user.id,
-                            plan: selectedPlan?.name.toLowerCase() || "pro",
-                            status: "pending",
-                            transaction_id: txnId.trim(),
-                            amount: selectedPlan?.amount || 99,
-                          });
-                          setTxnSubmitting(false);
-                          if (error) { toast.error("Failed to submit"); return; }
-                          toast.success("Payment submitted! We'll verify & activate within 24 hours.");
-                          setSelectedPlan(null);
-                          setTxnId("");
-                        }}
-                      >
-                        {txnSubmitting ? "Submitting..." : "Submit for Verification"}
-                      </Button>
-                      <p className="text-xs text-muted-foreground text-center">
-                        Or <a href="/payment-verification" className="text-primary underline">upload screenshot</a> for faster verification.
-                      </p>
+                    <div className="flex-1 w-full space-y-4">
+                      <div className="flex items-center gap-2 bg-muted rounded-lg px-4 py-3">
+                        <span className="text-sm text-muted-foreground">UPI ID:</span>
+                        <span className="font-mono font-semibold text-foreground flex-1">{UPI_ID}</span>
+                        <Button variant="ghost" size="icon" onClick={copyUpiId} className="shrink-0">
+                          {copied ? <CheckCircle className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                        </Button>
+                      </div>
+                      <a href={upiPaymentLink} className="block w-full">
+                        <Button variant="hero" className="w-full">
+                          <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan.price} via UPI App
+                        </Button>
+                      </a>
+                      <div className="border-t border-border pt-4 space-y-3">
+                        <p className="text-sm font-semibold text-card-foreground">After payment, enter your transaction ID:</p>
+                        <Input
+                          placeholder="Enter UPI Transaction ID"
+                          value={txnId}
+                          onChange={(e) => setTxnId(e.target.value)}
+                        />
+                        <Button
+                          variant="hero"
+                          className="w-full"
+                          disabled={!txnId.trim() || txnSubmitting}
+                          onClick={async () => {
+                            if (!user) { toast.error("Please sign in"); return; }
+                            setTxnSubmitting(true);
+                            const { error } = await supabase.from("subscriptions").insert({
+                              user_id: user.id,
+                              plan: selectedPlan.name.toLowerCase(),
+                              status: "pending",
+                              transaction_id: txnId.trim(),
+                              amount: selectedPlan.amount,
+                            });
+                            setTxnSubmitting(false);
+                            if (error) { toast.error("Failed to submit"); return; }
+                            toast.success("Payment submitted! We'll verify & activate within 24 hours.");
+                            setSelectedPlan(null);
+                            setTxnId("");
+                          }}
+                        >
+                          {txnSubmitting ? "Submitting..." : "Submit for Verification"}
+                        </Button>
+                        <p className="text-xs text-muted-foreground text-center">
+                          Or <a href="/payment-verification" className="text-primary underline">upload screenshot</a> for faster verification.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
+                </motion.div>
+              )}
 
               {/* Detailed sections - only for paid users */}
               {isPaid && (
