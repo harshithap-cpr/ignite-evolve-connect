@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRealtime } from "@/hooks/use-realtime";
 import {
   Search, Lightbulb, Calendar, MessageSquare, Bot, Send, CheckCircle, XCircle, Clock,
   TrendingUp, Star, Users, ArrowRight, Loader2, Sparkles
