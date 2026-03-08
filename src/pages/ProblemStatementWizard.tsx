@@ -118,6 +118,7 @@ const ProblemStatementWizard = () => {
       if (data?.error) throw new Error(data.error);
       const analysisData = data as Analysis;
       setAnalysis(analysisData);
+      await recordUsage();
       toast.success("Analysis complete! 🎯");
 
       // Auto-save for logged-in users
