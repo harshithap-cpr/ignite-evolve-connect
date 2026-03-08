@@ -1,14 +1,39 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function authenticateUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabase.auth.getClaims(token);
+  if (error || !data?.claims) return null;
+
+  return { userId: data.claims.sub as string, supabase };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await authenticateUser(req);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { trl_level, idea_title, idea_description, category } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -51,18 +76,18 @@ Recommend products this startup needs at their current stage.`,
                     items: {
                       type: "object",
                       properties: {
-                        name: { type: "string", description: "Product name" },
+                        name: { type: "string" },
                         category: { type: "string", enum: ["dev_hardware", "software", "office_equipment", "iot_sensors", "cloud_services", "prototyping"] },
-                        description: { type: "string", description: "Why this product is needed at this TRL stage" },
-                        estimated_price: { type: "string", description: "Price in INR with ₹ symbol" },
+                        description: { type: "string" },
+                        estimated_price: { type: "string" },
                         priority: { type: "string", enum: ["essential", "recommended", "nice_to_have"] },
                         buy_links: {
                           type: "array",
                           items: {
                             type: "object",
                             properties: {
-                              platform: { type: "string", description: "Platform name (Amazon, Flipkart, JioMart, etc.)" },
-                              url: { type: "string", description: "Search URL for the product on that platform" },
+                              platform: { type: "string" },
+                              url: { type: "string" },
                             },
                             required: ["platform", "url"],
                             additionalProperties: false,
@@ -73,12 +98,8 @@ Recommend products this startup needs at their current stage.`,
                       additionalProperties: false,
                     },
                   },
-                  total_budget_estimate: { type: "string", description: "Total estimated budget in INR" },
-                  procurement_tips: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "3-5 procurement tips for this TRL stage",
-                  },
+                  total_budget_estimate: { type: "string" },
+                  procurement_tips: { type: "array", items: { type: "string" } },
                 },
                 required: ["recommendations", "total_budget_estimate", "procurement_tips"],
                 additionalProperties: false,

@@ -1,14 +1,39 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function authenticateUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabase.auth.getClaims(token);
+  if (error || !data?.claims) return null;
+
+  return { userId: data.claims.sub as string, supabase };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const auth = await authenticateUser(req);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { title, problem_statement, proposed_solution, analysis } = await req.json();
 
     if (!title || !problem_statement || !proposed_solution) {
@@ -50,14 +75,7 @@ ANALYSIS DATA:
           },
           {
             role: "user",
-            content: `Create a pitch deck and elevator pitch for:
-
-TITLE: ${title}
-PROBLEM: ${problem_statement}
-SOLUTION: ${proposed_solution}
-${analysisContext}
-
-Generate 7 slides and a 1-minute elevator pitch script (about 150-170 words, naturally spoken pace).`,
+            content: `Create a pitch deck and elevator pitch for:\n\nTITLE: ${title}\nPROBLEM: ${problem_statement}\nSOLUTION: ${proposed_solution}\n${analysisContext}\n\nGenerate 7 slides and a 1-minute elevator pitch script (about 150-170 words, naturally spoken pace).`,
           },
         ],
         tools: [
@@ -75,34 +93,18 @@ Generate 7 slides and a 1-minute elevator pitch script (about 150-170 words, nat
                       type: "object",
                       properties: {
                         slide_number: { type: "number" },
-                        title: { type: "string", description: "Slide title" },
-                        subtitle: { type: "string", description: "Optional subtitle or tagline" },
-                        bullets: {
-                          type: "array",
-                          items: { type: "string" },
-                          description: "3-5 bullet points for this slide",
-                        },
-                        speaker_notes: { type: "string", description: "What to say when presenting this slide (2-3 sentences)" },
-                        slide_type: {
-                          type: "string",
-                          enum: ["title", "problem", "solution", "market", "traction", "team", "ask"],
-                          description: "Type of slide for styling",
-                        },
+                        title: { type: "string" },
+                        subtitle: { type: "string" },
+                        bullets: { type: "array", items: { type: "string" } },
+                        speaker_notes: { type: "string" },
+                        slide_type: { type: "string", enum: ["title", "problem", "solution", "market", "traction", "team", "ask"] },
                       },
                       required: ["slide_number", "title", "bullets", "speaker_notes", "slide_type"],
                       additionalProperties: false,
                     },
-                    description: "7 pitch deck slides",
                   },
-                  elevator_pitch: {
-                    type: "string",
-                    description: "A compelling 1-minute elevator pitch script (150-170 words)",
-                  },
-                  pitch_tips: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "3-5 tips for delivering this pitch effectively",
-                  },
+                  elevator_pitch: { type: "string" },
+                  pitch_tips: { type: "array", items: { type: "string" } },
                 },
                 required: ["slides", "elevator_pitch", "pitch_tips"],
                 additionalProperties: false,

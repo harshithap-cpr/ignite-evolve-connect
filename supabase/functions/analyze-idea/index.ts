@@ -1,20 +1,82 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const FREE_LIMIT = 2;
+
+async function authenticateUser(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabase.auth.getClaims(token);
+  if (error || !data?.claims) return null;
+
+  return { userId: data.claims.sub as string, supabase };
+}
+
+async function checkUsageGate(supabase: any, userId: string, feature: string) {
+  // Check subscription
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("plan")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (sub?.plan === "pro" || sub?.plan === "premium") return true;
+
+  // Check usage count
+  const { count } = await supabase
+    .from("usage_tracking")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("feature", feature);
+
+  return (count || 0) < FREE_LIMIT;
+}
+
+async function recordUsage(supabase: any, userId: string, feature: string) {
+  await supabase.from("usage_tracking").insert({ user_id: userId, feature });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Authenticate
+    const auth = await authenticateUser(req);
+    if (!auth) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { problem_statement, proposed_solution } = await req.json();
 
     if (!problem_statement || !proposed_solution) {
       return new Response(JSON.stringify({ error: "Problem statement and solution are required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check usage gate server-side
+    const canUse = await checkUsageGate(auth.supabase, auth.userId, "analyze-idea");
+    if (!canUse) {
+      return new Response(JSON.stringify({ error: "Free usage limit reached. Please upgrade to continue." }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -36,13 +98,7 @@ serve(async (req) => {
           },
           {
             role: "user",
-            content: `Analyze this startup idea:
-
-PROBLEM: ${problem_statement}
-
-SOLUTION: ${proposed_solution}
-
-Provide a detailed analysis including ethical considerations and novelty assessment.`,
+            content: `Analyze this startup idea:\n\nPROBLEM: ${problem_statement}\n\nSOLUTION: ${proposed_solution}\n\nProvide a detailed analysis including ethical considerations and novelty assessment.`,
           },
         ],
         tools: [
@@ -54,105 +110,57 @@ Provide a detailed analysis including ethical considerations and novelty assessm
               parameters: {
                 type: "object",
                 properties: {
-                  market_value: {
-                    type: "string",
-                    description: "Estimated total addressable market value with currency (e.g., '$4.2 Billion by 2028')",
-                  },
-                  market_growth: {
-                    type: "string",
-                    description: "Market CAGR or growth trend (e.g., '12.5% CAGR')",
-                  },
+                  market_value: { type: "string", description: "Estimated total addressable market value with currency (e.g., '$4.2 Billion by 2028')" },
+                  market_growth: { type: "string", description: "Market CAGR or growth trend (e.g., '12.5% CAGR')" },
                   target_customers: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        segment: { type: "string", description: "Customer segment name" },
-                        size: { type: "string", description: "Estimated segment size" },
+                        segment: { type: "string" }, size: { type: "string" },
                         pain_level: { type: "string", enum: ["High", "Medium", "Low"] },
                       },
-                      required: ["segment", "size", "pain_level"],
-                      additionalProperties: false,
+                      required: ["segment", "size", "pain_level"], additionalProperties: false,
                     },
-                    description: "3-5 target customer segments",
                   },
                   competing_apps: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        name: { type: "string", description: "Competitor name" },
-                        description: { type: "string", description: "What they do (1 sentence)" },
-                        weakness: { type: "string", description: "Their main weakness you can exploit" },
+                        name: { type: "string" }, description: { type: "string" }, weakness: { type: "string" },
                       },
-                      required: ["name", "description", "weakness"],
-                      additionalProperties: false,
+                      required: ["name", "description", "weakness"], additionalProperties: false,
                     },
-                    description: "3-5 competing apps or solutions",
                   },
-                  innovation_score: {
-                    type: "number",
-                    description: "Innovation score 1-10",
-                  },
-                  feasibility_score: {
-                    type: "number",
-                    description: "Feasibility score 1-10",
-                  },
-                  market_score: {
-                    type: "number",
-                    description: "Market potential score 1-10",
-                  },
-                  ethical_score: {
-                    type: "number",
-                    description: "Ethical score 1-10. Evaluates data privacy, social impact, fairness, environmental impact, and potential for misuse.",
-                  },
-                  novelty_score: {
-                    type: "number",
-                    description: "Novelty/originality score 1-10. How unique and original is this idea compared to existing solutions.",
-                  },
-                  overall_score: {
-                    type: "number",
-                    description: "Overall score 1-10",
-                  },
+                  innovation_score: { type: "number" }, feasibility_score: { type: "number" },
+                  market_score: { type: "number" },
+                  ethical_score: { type: "number", description: "Ethical score 1-10." },
+                  novelty_score: { type: "number", description: "Novelty/originality score 1-10." },
+                  overall_score: { type: "number" },
                   ethical_analysis: {
                     type: "object",
                     properties: {
-                      privacy_concern: { type: "string", description: "Data privacy concerns and how they can be addressed" },
-                      social_impact: { type: "string", description: "Positive or negative social impact assessment" },
-                      fairness: { type: "string", description: "Fairness and bias considerations" },
-                      environmental_impact: { type: "string", description: "Environmental sustainability assessment" },
-                      risk_level: { type: "string", enum: ["Low", "Medium", "High"], description: "Overall ethical risk level" },
+                      privacy_concern: { type: "string" }, social_impact: { type: "string" },
+                      fairness: { type: "string" }, environmental_impact: { type: "string" },
+                      risk_level: { type: "string", enum: ["Low", "Medium", "High"] },
                     },
                     required: ["privacy_concern", "social_impact", "fairness", "environmental_impact", "risk_level"],
                     additionalProperties: false,
-                    description: "Detailed ethical analysis of the idea",
                   },
                   novelty_analysis: {
                     type: "object",
                     properties: {
-                      uniqueness: { type: "string", description: "What makes this idea unique compared to existing solutions" },
-                      prior_art: { type: "string", description: "Similar existing solutions or prior art" },
-                      differentiator: { type: "string", description: "Key differentiating factor" },
-                      patentability: { type: "string", enum: ["High", "Medium", "Low"], description: "Potential for patent protection" },
+                      uniqueness: { type: "string" }, prior_art: { type: "string" },
+                      differentiator: { type: "string" },
+                      patentability: { type: "string", enum: ["High", "Medium", "Low"] },
                     },
                     required: ["uniqueness", "prior_art", "differentiator", "patentability"],
                     additionalProperties: false,
-                    description: "Detailed novelty and originality analysis",
                   },
-                  strengths: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "3 key strengths of this idea",
-                  },
-                  improvements: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "3 suggestions to improve the idea",
-                  },
-                  verdict: {
-                    type: "string",
-                    description: "A 2-3 sentence overall verdict on the idea's potential",
-                  },
+                  strengths: { type: "array", items: { type: "string" } },
+                  improvements: { type: "array", items: { type: "string" } },
+                  verdict: { type: "string" },
                 },
                 required: [
                   "market_value", "market_growth", "target_customers", "competing_apps",
@@ -189,7 +197,7 @@ Provide a detailed analysis including ethical considerations and novelty assessm
 
     const result = await response.json();
     const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
-    
+
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "AI did not return structured analysis" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -197,6 +205,9 @@ Provide a detailed analysis including ethical considerations and novelty assessm
     }
 
     const analysis = JSON.parse(toolCall.function.arguments);
+
+    // Record usage server-side
+    await recordUsage(auth.supabase, auth.userId, "analyze-idea");
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
