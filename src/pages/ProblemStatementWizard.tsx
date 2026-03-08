@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PaywallBanner from "@/components/PaywallBanner";
 import {
   Lightbulb,
   Sparkles,
