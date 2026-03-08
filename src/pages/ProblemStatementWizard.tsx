@@ -175,6 +175,13 @@ const ProblemStatementWizard = () => {
               <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit}>
                 <Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI
               </Button>
+              {!canSubmit && (title.length > 0 || problemStatement.length > 0 || proposedSolution.length > 0) && (
+                <div className="p-3 bg-destructive/10 rounded-xl text-sm text-destructive text-center space-y-1">
+                  {title.length === 0 && <p>• Please enter a title for your idea</p>}
+                  {problemStatement.length <= 10 && <p>• Problem statement needs at least 10 characters ({problemStatement.length}/10)</p>}
+                  {proposedSolution.length <= 10 && <p>• Proposed solution needs at least 10 characters ({proposedSolution.length}/10)</p>}
+                </div>
+              )}
               {!user && (
                 <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center">
                   ⚠️ Sign in to save your analysis. You can still analyze without signing in.
