@@ -32,6 +32,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/use-subscription";
+import { Crown, Lock } from "lucide-react";
 
 interface EthicalAnalysis {
   privacy_concern: string;
@@ -96,11 +98,14 @@ const ProblemStatementWizard = () => {
   const [saved, setSaved] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isPaid, plan, loading: subLoading } = useSubscription();
 
   const canSubmit = title.length > 0 && problemStatement.length > 10 && proposedSolution.length > 10;
 
   const handleAnalyze = async () => {
     if (!canSubmit) return;
+    if (!user) { toast.error("Please sign in to use AI analysis"); navigate("/auth"); return; }
+    if (!isPaid) { toast.error("AI Analysis requires a Pro or Premium plan"); return; }
     setIsAnalyzing(true);
     setAnalysis(null);
     try {
@@ -192,8 +197,22 @@ const ProblemStatementWizard = () => {
                 <Textarea value={proposedSolution} onChange={(e) => setProposedSolution(e.target.value)} placeholder="Describe your solution. What will it do? How will users benefit?" className="mt-1.5 rounded-xl min-h-[120px]" />
                 <p className="text-xs text-muted-foreground mt-1">💡 Tip: Focus on what makes your approach different and better.</p>
               </div>
-              <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit}>
-                <Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI
+              {user && !isPaid && !subLoading && (
+                <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 text-center space-y-3">
+                  <div className="flex items-center justify-center gap-2">
+                    <Lock className="w-5 h-5 text-primary" />
+                    <p className="font-bold text-foreground">AI Analysis requires a paid plan</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Upgrade to Pro (₹99/mo) or Premium (₹250/mo) to unlock AI-powered idea analysis.</p>
+                  <Button variant="hero" size="sm" onClick={() => navigate("/#pricing")}>
+                    <Crown className="w-4 h-4 mr-2" /> View Plans
+                  </Button>
+                </div>
+              )}
+              <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit || !isPaid || subLoading}>
+                {!user ? <><Lock className="w-5 h-5 mr-2" /> Sign in to Analyze</> :
+                 !isPaid ? <><Lock className="w-5 h-5 mr-2" /> Upgrade to Analyze</> :
+                 <><Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI</>}
               </Button>
               {!canSubmit && (title.length > 0 || problemStatement.length > 0 || proposedSolution.length > 0) && (
                 <div className="p-3 bg-destructive/10 rounded-xl text-sm text-destructive text-center space-y-1">
@@ -204,7 +223,7 @@ const ProblemStatementWizard = () => {
               )}
               {!user && (
                 <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center">
-                  ⚠️ Sign in to save your analysis. You can still analyze without signing in.
+                  ⚠️ Sign in and subscribe to a paid plan to use AI analysis.
                 </div>
               )}
             </motion.div>
