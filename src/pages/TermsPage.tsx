@@ -39,7 +39,7 @@ const TermsPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">6. Hackathon Participation</h2>
-              <p>By registering for hackathons, you agree to the specific rules of each event. Prizes are distributed per hackathon terms. Spark Guidance reserves the right to disqualify participants for misconduct.</p>
+              <p>By registering for hackathons, you agree to the specific rules of each event. Prizes are distributed per hackathon terms. Innvo Spark Guidance reserves the right to disqualify participants for misconduct.</p>
             </section>
 
             <section>
