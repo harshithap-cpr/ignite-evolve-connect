@@ -8,6 +8,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUsageGate } from "@/hooks/use-usage-gate";
+import PaywallBanner from "@/components/PaywallBanner";
 import { toast } from "sonner";
 import {
   Building2, MapPin, Clock, Banknote, Percent, Search,
@@ -94,8 +96,11 @@ const IncubationHubPage = () => {
     setMyRegistrations(new Set((data || []).map((r: any) => r.incubator_id)));
   };
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("incubator_registration");
+
   const handleRegister = async () => {
     if (!user || !registerDialog) return;
+    if (!canUse) { toast.error("Free registration limit reached. Please upgrade."); return; }
     setSubmitting(true);
     try {
       const { error } = await supabase.from("incubator_registrations").insert({
@@ -106,6 +111,7 @@ const IncubationHubPage = () => {
         message: regMessage || null,
       });
       if (error) throw error;
+      await recordUsage();
       toast.success(`Registered for ${registerDialog.name}!`);
       setMyRegistrations((prev) => new Set([...prev, registerDialog.id]));
       setRegisterDialog(null);

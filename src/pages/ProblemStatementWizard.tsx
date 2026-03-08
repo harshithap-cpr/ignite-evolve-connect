@@ -33,6 +33,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useUsageGate } from "@/hooks/use-usage-gate";
+import PaywallBanner from "@/components/PaywallBanner";
 import { Crown, Lock } from "lucide-react";
 
 interface EthicalAnalysis {
@@ -99,11 +101,13 @@ const ProblemStatementWizard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isPaid, plan, loading: subLoading } = useSubscription();
+  const { canUse: canAnalyze, remainingFree, recordUsage } = useUsageGate("ai_analysis");
 
   const canSubmit = title.length > 0 && problemStatement.length > 10 && proposedSolution.length > 10;
 
   const handleAnalyze = async () => {
     if (!canSubmit) return;
+    if (!canAnalyze) { toast.error("Free analysis limit reached. Please upgrade to continue."); return; }
     setIsAnalyzing(true);
     setAnalysis(null);
     try {
@@ -114,6 +118,7 @@ const ProblemStatementWizard = () => {
       if (data?.error) throw new Error(data.error);
       const analysisData = data as Analysis;
       setAnalysis(analysisData);
+      await recordUsage();
       toast.success("Analysis complete! 🎯");
 
       // Auto-save for logged-in users

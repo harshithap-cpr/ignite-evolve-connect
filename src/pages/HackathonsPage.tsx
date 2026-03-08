@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useUsageGate } from "@/hooks/use-usage-gate";
+import PaywallBanner from "@/components/PaywallBanner";
 
 interface Hackathon {
   id: string;
@@ -66,12 +68,15 @@ const HackathonsPage = () => {
     checkIdeas();
   }, [user]);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("hackathon_registration");
+
   const handleRegister = async (hackathonId: string) => {
     if (!user) {
       toast.error("Please sign in to register");
       navigate("/auth");
       return;
     }
+    if (!canUse) { toast.error("Free registration limit reached. Please upgrade."); return; }
     if (!hasIdeas) {
       toast.error("Please submit and save an idea first before registering for hackathons");
       navigate("/submit-idea");
@@ -84,6 +89,7 @@ const HackathonsPage = () => {
       if (error.code === "23505") toast.info("You're already registered!");
       else toast.error("Registration failed");
     } else {
+      await recordUsage();
       toast.success("Successfully registered! 🎉");
     }
   };
@@ -100,6 +106,7 @@ const HackathonsPage = () => {
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          <PaywallBanner feature="hackathon registration" remainingFree={remainingFree} canUse={canUse} isPaid={isPaid} />
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">
               Discover <span className="text-gradient-warm">Hackathons</span>

@@ -18,6 +18,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useUsageGate } from "@/hooks/use-usage-gate";
+import PaywallBanner from "@/components/PaywallBanner";
 
 interface Investor {
   id: string;
@@ -70,12 +72,15 @@ const InvestorsPage = () => {
     fetchInvestors();
   }, []);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("investor_connection");
+
   const handleConnect = async () => {
     if (!user) {
       toast.error("Please sign in to connect");
       navigate("/auth");
       return;
     }
+    if (!canUse) { toast.error("Free connection limit reached. Please upgrade."); return; }
     if (!selectedInvestor) return;
 
     const { error } = await supabase.from("investor_connections").insert({
@@ -88,6 +93,7 @@ const InvestorsPage = () => {
       if (error.code === "23505") toast.info("You've already requested a connection!");
       else toast.error("Connection request failed");
     } else {
+      await recordUsage();
       toast.success(`Connection request sent to ${selectedInvestor.name}! 🤝`);
       setSelectedInvestor(null);
       setConnectMessage("");
@@ -122,6 +128,7 @@ const InvestorsPage = () => {
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          <PaywallBanner feature="investor connection" remainingFree={remainingFree} canUse={canUse} isPaid={isPaid} />
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">
               Find <span className="text-gradient-warm">Investors</span>

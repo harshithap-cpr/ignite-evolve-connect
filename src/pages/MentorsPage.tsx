@@ -9,6 +9,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useUsageGate } from "@/hooks/use-usage-gate";
+import PaywallBanner from "@/components/PaywallBanner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -71,8 +73,11 @@ const MentorsPage = () => {
     fetchMentors();
   }, []);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("mentor_booking");
+
   const handleBooking = async () => {
     if (!user) { toast.error("Please sign in to book"); navigate("/auth"); return; }
+    if (!canUse) { toast.error("Free booking limit reached. Please upgrade."); return; }
     if (!selectedMentor || !bookingDate) return;
     const { error } = await supabase.from("mentor_bookings").insert({
       mentor_id: selectedMentor.id, user_id: user.id,
@@ -81,6 +86,7 @@ const MentorsPage = () => {
     });
     if (error) toast.error("Booking failed. Try again.");
     else {
+      await recordUsage();
       toast.success(`Session booked with ${selectedMentor.name}! 🎉`);
       setSelectedMentor(null); setBookingDate(""); setBookingNotes(""); setUserDomain("");
     }
@@ -100,6 +106,7 @@ const MentorsPage = () => {
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          <PaywallBanner feature="mentor booking" remainingFree={remainingFree} canUse={canUse} isPaid={isPaid} />
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">
               Connect with <span className="text-gradient-warm">Mentors</span>

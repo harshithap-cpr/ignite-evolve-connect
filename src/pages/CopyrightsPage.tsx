@@ -26,6 +26,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useUsageGate } from "@/hooks/use-usage-gate";
+import PaywallBanner from "@/components/PaywallBanner";
 import { format } from "date-fns";
 
 interface CopyrightEntry {
@@ -93,9 +95,12 @@ const CopyrightsPage = () => {
     fetchCopyrights();
   }, [user]);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("copyright_filing");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { toast.error("Please sign in first"); navigate("/auth"); return; }
+    if (!canUse) { toast.error("Free copyright filing limit reached. Please upgrade."); return; }
 
     const { error } = await supabase.from("copyrights" as any).insert({
       user_id: user.id,
@@ -110,6 +115,7 @@ const CopyrightsPage = () => {
     if (error) {
       toast.error("Failed to register copyright");
     } else {
+      await recordUsage();
       toast.success("Copyright registered successfully! ©");
       setShowForm(false);
       setFormData({ title: "", description: "", work_type: "literary", authors: "", keywords: "", notes: "" });
@@ -146,6 +152,7 @@ const CopyrightsPage = () => {
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          <PaywallBanner feature="copyright filing" remainingFree={remainingFree} canUse={canUse} isPaid={isPaid} />
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold font-display mb-2">

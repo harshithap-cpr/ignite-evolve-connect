@@ -919,6 +919,27 @@ export type Database = {
         }
         Relationships: []
       }
+      usage_tracking: {
+        Row: {
+          feature: string
+          id: string
+          used_at: string
+          user_id: string
+        }
+        Insert: {
+          feature: string
+          id?: string
+          used_at?: string
+          user_id: string
+        }
+        Update: {
+          feature?: string
+          id?: string
+          used_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
