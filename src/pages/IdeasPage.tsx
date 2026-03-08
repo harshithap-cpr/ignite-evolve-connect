@@ -13,7 +13,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Lightbulb, Plus, TrendingUp, Eye, EyeOff } from "lucide-react";
+import { Lightbulb, Plus, TrendingUp, Eye, EyeOff, FileText, Shield, Gem, Swords, Target, Users, Star, AlertTriangle, ArrowRight, CheckCircle2, Presentation, Copy, Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
