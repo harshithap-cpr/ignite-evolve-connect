@@ -13,7 +13,10 @@ import PatentsPage from "./pages/PatentsPage";
 import IdeasPage from "./pages/IdeasPage";
 import InvestorsPage from "./pages/InvestorsPage";
 import ProblemStatementWizard from "./pages/ProblemStatementWizard";
+import TermsPage from "./pages/TermsPage";
+import DisclaimerPage from "./pages/DisclaimerPage";
 import NotFound from "./pages/NotFound";
+import AppFeedback from "./components/AppFeedback";
 
 const queryClient = new QueryClient();
 
@@ -34,8 +37,11 @@ const App = () => (
             <Route path="/ideas" element={<IdeasPage />} />
             <Route path="/investors" element={<InvestorsPage />} />
             <Route path="/submit-idea" element={<ProblemStatementWizard />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <AppFeedback />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
