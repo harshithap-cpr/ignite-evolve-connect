@@ -180,6 +180,203 @@ export type Database = {
         }
         Relationships: []
       }
+      idea_votes: {
+        Row: {
+          created_at: string
+          id: string
+          idea_id: string
+          user_id: string
+          vote_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idea_id: string
+          user_id: string
+          vote_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idea_id?: string
+          user_id?: string
+          vote_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idea_votes_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ideas: {
+        Row: {
+          created_at: string
+          feasibility_score: number | null
+          feedback: string | null
+          id: string
+          innovation_score: number | null
+          is_public: boolean | null
+          market_score: number | null
+          market_size: string | null
+          overall_score: number | null
+          problem_statement: string | null
+          proposed_solution: string | null
+          stage: string | null
+          tags: string[] | null
+          target_audience: string | null
+          title: string
+          unique_value: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feasibility_score?: number | null
+          feedback?: string | null
+          id?: string
+          innovation_score?: number | null
+          is_public?: boolean | null
+          market_score?: number | null
+          market_size?: string | null
+          overall_score?: number | null
+          problem_statement?: string | null
+          proposed_solution?: string | null
+          stage?: string | null
+          tags?: string[] | null
+          target_audience?: string | null
+          title: string
+          unique_value?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feasibility_score?: number | null
+          feedback?: string | null
+          id?: string
+          innovation_score?: number | null
+          is_public?: boolean | null
+          market_score?: number | null
+          market_size?: string | null
+          overall_score?: number | null
+          problem_statement?: string | null
+          proposed_solution?: string | null
+          stage?: string | null
+          tags?: string[] | null
+          target_audience?: string | null
+          title?: string
+          unique_value?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      investor_connections: {
+        Row: {
+          created_at: string
+          id: string
+          idea_id: string | null
+          investor_id: string
+          message: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idea_id?: string | null
+          investor_id: string
+          message?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idea_id?: string | null
+          investor_id?: string
+          message?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_connections_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investor_connections_investor_id_fkey"
+            columns: ["investor_id"]
+            isOneToOne: false
+            referencedRelation: "investors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investors: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          focus_areas: string[] | null
+          id: string
+          investment_range: string | null
+          investor_type: string | null
+          is_active: boolean | null
+          linkedin_url: string | null
+          location: string | null
+          name: string
+          portfolio_size: number | null
+          title: string | null
+          website_url: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          focus_areas?: string[] | null
+          id?: string
+          investment_range?: string | null
+          investor_type?: string | null
+          is_active?: boolean | null
+          linkedin_url?: string | null
+          location?: string | null
+          name: string
+          portfolio_size?: number | null
+          title?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          focus_areas?: string[] | null
+          id?: string
+          investment_range?: string | null
+          investor_type?: string | null
+          is_active?: boolean | null
+          linkedin_url?: string | null
+          location?: string | null
+          name?: string
+          portfolio_size?: number | null
+          title?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       mentor_bookings: {
         Row: {
           created_at: string
@@ -266,6 +463,57 @@ export type Database = {
           title?: string | null
           total_sessions?: number | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      patents: {
+        Row: {
+          application_number: string | null
+          created_at: string
+          description: string | null
+          document_url: string | null
+          filing_date: string | null
+          id: string
+          invention_type: string | null
+          inventors: string[] | null
+          keywords: string[] | null
+          notes: string | null
+          stage: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          application_number?: string | null
+          created_at?: string
+          description?: string | null
+          document_url?: string | null
+          filing_date?: string | null
+          id?: string
+          invention_type?: string | null
+          inventors?: string[] | null
+          keywords?: string[] | null
+          notes?: string | null
+          stage?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          application_number?: string | null
+          created_at?: string
+          description?: string | null
+          document_url?: string | null
+          filing_date?: string | null
+          id?: string
+          invention_type?: string | null
+          inventors?: string[] | null
+          keywords?: string[] | null
+          notes?: string | null
+          stage?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

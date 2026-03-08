@@ -1,17 +1,27 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles, LogOut, User } from "lucide-react";
+import { Menu, X, Sparkles, LogOut, User, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
-  { label: "Features", href: "/#features" },
   { label: "Hackathons", href: "/hackathons" },
   { label: "Mentors", href: "/mentors" },
   { label: "Courses", href: "/courses" },
-  { label: "Pricing", href: "/#pricing" },
+];
+
+const moreLinks = [
+  { label: "Idea Lab", href: "/ideas" },
+  { label: "Patents", href: "/patents" },
+  { label: "Investors", href: "/investors" },
 ];
 
 const Navbar = () => {
@@ -25,6 +35,12 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const NavItem = ({ href, label }: { href: string; label: string }) => (
+    <Link to={href} className="text-muted-foreground hover:text-foreground font-medium transition-colors text-sm">
+      {label}
+    </Link>
+  );
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -36,26 +52,22 @@ const Navbar = () => {
           <span className="text-gradient-warm">Guidance</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) =>
-            link.href.startsWith("/") && !link.href.startsWith("/#") ? (
-              <Link
-                key={link.label}
-                to={link.href}
-                className="text-muted-foreground hover:text-foreground font-medium transition-colors text-sm"
-              >
-                {link.label}
-              </Link>
-            ) : (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-muted-foreground hover:text-foreground font-medium transition-colors text-sm"
-              >
-                {link.label}
-              </a>
-            )
-          )}
+        <div className="hidden md:flex items-center gap-6">
+          {navLinks.map((link) => (
+            <NavItem key={link.label} {...link} />
+          ))}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="text-muted-foreground hover:text-foreground font-medium transition-colors text-sm flex items-center gap-1">
+              More <ChevronDown className="w-3 h-3" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-xl">
+              {moreLinks.map((link) => (
+                <DropdownMenuItem key={link.label} asChild>
+                  <Link to={link.href} className="cursor-pointer">{link.label}</Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -95,39 +107,28 @@ const Navbar = () => {
             className="md:hidden bg-background border-b border-border"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-              {navLinks.map((link) =>
-                link.href.startsWith("/") && !link.href.startsWith("/#") ? (
-                  <Link
-                    key={link.label}
-                    to={link.href}
-                    className="text-muted-foreground hover:text-foreground font-medium py-2"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ) : (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="text-muted-foreground hover:text-foreground font-medium py-2"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {link.label}
-                  </a>
-                )
-              )}
+              {[...navLinks, ...moreLinks].map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  className="text-muted-foreground hover:text-foreground font-medium py-2"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
               <div className="flex gap-3 pt-2">
                 {user ? (
-                  <Button variant="ghost" size="sm" className="flex-1" onClick={handleSignOut}>
+                  <Button variant="ghost" size="sm" className="flex-1" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
                     Sign Out
                   </Button>
                 ) : (
                   <>
                     <Button variant="ghost" size="sm" className="flex-1" asChild>
-                      <Link to="/auth">Log in</Link>
+                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Log in</Link>
                     </Button>
                     <Button variant="hero" size="sm" className="flex-1" asChild>
-                      <Link to="/auth">Get Started</Link>
+                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Get Started</Link>
                     </Button>
                   </>
                 )}
