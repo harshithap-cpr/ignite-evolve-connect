@@ -113,7 +113,7 @@ const ProblemStatementWizard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isPaid, plan, loading: subLoading } = useSubscription();
-  const { canUse: canAnalyze, remainingFree, recordUsage } = useUsageGate("ai_analysis");
+  const { canUse: canAnalyze, remainingFree } = useUsageGate("ai_analysis");
 
   const canSubmit = title.length > 0 && problemStatement.length > 10 && proposedSolution.length > 10;
 
