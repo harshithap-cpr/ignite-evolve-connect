@@ -38,7 +38,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "₹1,499",
+    price: "₹250",
     period: "/month",
     description: "Full access with personal guidance",
     features: [
