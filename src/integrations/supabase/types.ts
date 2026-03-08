@@ -415,6 +415,7 @@ export type Database = {
           name: string
           portfolio_size: number | null
           title: string | null
+          user_id: string | null
           website_url: string | null
         }
         Insert: {
@@ -433,6 +434,7 @@ export type Database = {
           name: string
           portfolio_size?: number | null
           title?: string | null
+          user_id?: string | null
           website_url?: string | null
         }
         Update: {
@@ -451,6 +453,7 @@ export type Database = {
           name?: string
           portfolio_size?: number | null
           title?: string | null
+          user_id?: string | null
           website_url?: string | null
         }
         Relationships: []

@@ -5,18 +5,59 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Sparkles, ArrowLeft, User, Briefcase, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
+
+const roles = [
+  { value: "innovator", label: "Innovator", icon: Sparkles, desc: "Submit ideas & build startups" },
+  { value: "mentor", label: "Mentor", icon: GraduationCap, desc: "Guide & mentor innovators" },
+  { value: "investor", label: "Investor", icon: Briefcase, desc: "Fund promising startups" },
+];
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [selectedRole, setSelectedRole] = useState("innovator");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Extra fields for mentor/investor
+  const [company, setCompany] = useState("");
+  const [title, setTitle] = useState("");
+  const [bio, setBio] = useState("");
+
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const createRoleProfile = async (userId: string) => {
+    // Update profile role
+    await supabase.from("profiles").update({ role: selectedRole } as any).eq("user_id", userId);
+
+    if (selectedRole === "mentor") {
+      await supabase.from("mentors" as any).insert({
+        user_id: userId,
+        name: fullName,
+        company: company || null,
+        title: title || null,
+        bio: bio || null,
+        expertise: [],
+        is_available: true,
+      } as any);
+    } else if (selectedRole === "investor") {
+      await supabase.from("investors" as any).insert({
+        user_id: userId,
+        name: fullName,
+        company: company || null,
+        title: title || null,
+        bio: bio || null,
+        focus_areas: [],
+        is_active: true,
+      } as any);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +73,16 @@ const AuthPage = () => {
       else { toast.success("Welcome back!"); navigate("/"); }
     } else {
       const { error } = await signUp(email, password, fullName);
-      if (error) toast.error(error.message);
-      else toast.success("Account created successfully! 🎉");
+      if (error) {
+        toast.error(error.message);
+      } else {
+        // Get the user to create role profile
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await createRoleProfile(user.id);
+        }
+        toast.success("Account created successfully! 🎉 Check your email to verify.");
+      }
     }
     setLoading(false);
   };
@@ -55,10 +104,39 @@ const AuthPage = () => {
           </div>
 
           <p className="text-center text-muted-foreground text-sm mb-8">
-            {isLogin ? "Welcome back! Sign in to continue." : "Create your innovator account."}
+            {isLogin ? "Welcome back! Sign in to continue." : "Create your account."}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Role selector for signup */}
+            {!isLogin && (
+              <div>
+                <Label className="text-sm font-medium mb-2 block">I am a</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {roles.map((role) => {
+                    const Icon = role.icon;
+                    const isSelected = selectedRole === role.value;
+                    return (
+                      <button
+                        key={role.value}
+                        type="button"
+                        onClick={() => setSelectedRole(role.value)}
+                        className={`p-3 rounded-xl border-2 text-center transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-secondary/30 text-muted-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        <Icon className="w-5 h-5 mx-auto mb-1" />
+                        <span className="text-xs font-semibold block">{role.label}</span>
+                        <span className="text-[10px] block mt-0.5 opacity-70">{role.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {!isLogin && (
               <div>
                 <Label htmlFor="fullName" className="text-sm font-medium">Full Name</Label>
@@ -78,6 +156,30 @@ const AuthPage = () => {
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••" className="mt-1.5 rounded-xl" required minLength={6} />
             </div>
+
+            {/* Extra fields for mentor/investor */}
+            {!isLogin && (selectedRole === "mentor" || selectedRole === "investor") && (
+              <div className="space-y-3 p-3 bg-secondary/30 rounded-xl border border-border">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {selectedRole === "mentor" ? "🎓 Mentor Details" : "💼 Investor Details"}
+                </p>
+                <div>
+                  <Label className="text-sm font-medium">Company / Organization</Label>
+                  <Input value={company} onChange={(e) => setCompany(e.target.value)}
+                    placeholder={selectedRole === "mentor" ? "University or Company" : "Fund or Company"} className="mt-1 rounded-xl" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Title / Role</Label>
+                  <Input value={title} onChange={(e) => setTitle(e.target.value)}
+                    placeholder={selectedRole === "mentor" ? "e.g. Senior Engineer" : "e.g. Managing Partner"} className="mt-1 rounded-xl" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Short Bio</Label>
+                  <Input value={bio} onChange={(e) => setBio(e.target.value)}
+                    placeholder="Brief description of your expertise" className="mt-1 rounded-xl" />
+                </div>
+              </div>
+            )}
 
             {/* Terms & Disclaimer for signup */}
             {!isLogin && (
@@ -106,7 +208,7 @@ const AuthPage = () => {
             )}
 
             <Button variant="hero" className="w-full" disabled={loading || (!isLogin && !acceptedTerms)}>
-              {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+              {loading ? "Please wait..." : isLogin ? "Sign In" : `Create ${roles.find(r => r.value === selectedRole)?.label} Account`}
             </Button>
           </form>
 
