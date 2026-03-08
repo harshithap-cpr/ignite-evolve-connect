@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 const demoSteps = [
   {
     icon: Sparkles,
-    title: "Welcome to Spark Guidance",
+    title: "Welcome to Innvo Spark Guidance",
     description: "Your all-in-one innovation platform to transform ideas into reality. Let us walk you through how it works!",
     image: "🚀",
     color: "bg-primary/10 text-primary",
