@@ -98,11 +98,14 @@ const ProblemStatementWizard = () => {
   const [saved, setSaved] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isPaid, plan, loading: subLoading } = useSubscription();
 
   const canSubmit = title.length > 0 && problemStatement.length > 10 && proposedSolution.length > 10;
 
   const handleAnalyze = async () => {
     if (!canSubmit) return;
+    if (!user) { toast.error("Please sign in to use AI analysis"); navigate("/auth"); return; }
+    if (!isPaid) { toast.error("AI Analysis requires a Pro or Premium plan"); return; }
     setIsAnalyzing(true);
     setAnalysis(null);
     try {
