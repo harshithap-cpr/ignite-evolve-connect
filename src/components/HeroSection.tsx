@@ -72,9 +72,16 @@ const HeroSection = () => {
                   </div>
                 ))}
               </div>
-              <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
                 <span className="font-bold text-foreground">2,000+</span> innovators already onboard
               </div>
+              {subscriberCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                  <Crown className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold text-primary">{subscriberCount}</span>
+                  <span className="text-xs text-muted-foreground">paid subscribers</span>
+                </div>
+              )}
             </div>
           </motion.div>
 
