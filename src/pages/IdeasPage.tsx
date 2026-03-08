@@ -83,6 +83,14 @@ const IdeasPage = () => {
 
   useEffect(() => { fetchIdeas(); }, [user]);
 
+  // Realtime: refresh ideas when any idea changes
+  useRealtime({
+    table: "ideas",
+    onInsert: () => fetchIdeas(),
+    onUpdate: () => fetchIdeas(),
+    onDelete: () => fetchIdeas(),
+  });
+
   const calculateScores = (data: typeof formData) => {
     let innovation = 0, feasibility = 0, market = 0;
     if (data.problem_statement.length > 50) innovation += 3;
