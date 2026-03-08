@@ -27,6 +27,7 @@ const moreLinks = [
   { label: "Patents", href: "/patents" },
   { label: "Copyrights", href: "/copyrights" },
   { label: "Investors", href: "/investors" },
+  { label: "Procurement", href: "/procurement" },
 ];
 
 const Navbar = () => {
