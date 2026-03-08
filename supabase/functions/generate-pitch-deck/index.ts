@@ -69,6 +69,13 @@ serve(async (req) => {
       });
     }
 
+    const canUse = await checkUsageGate(auth.supabase, auth.userId, "pitch_deck_generation");
+    if (!canUse) {
+      return new Response(JSON.stringify({ error: "Free usage limit reached. Please upgrade to continue." }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
