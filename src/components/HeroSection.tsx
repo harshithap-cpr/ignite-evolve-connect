@@ -1,14 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, Users, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-illustration.jpg";
 import DemoWalkthrough from "@/components/DemoWalkthrough";
+import { supabase } from "@/integrations/supabase/client";
 
 const HeroSection = () => {
   const [demoOpen, setDemoOpen] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active");
+      setSubscriberCount(count || 0);
+    };
+    fetchCount();
+  }, []);
 
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-hero overflow-hidden">
@@ -59,9 +72,16 @@ const HeroSection = () => {
                   </div>
                 ))}
               </div>
-              <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
                 <span className="font-bold text-foreground">2,000+</span> innovators already onboard
               </div>
+              {subscriberCount > 0 && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                  <Crown className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold text-primary">{subscriberCount}</span>
+                  <span className="text-xs text-muted-foreground">paid subscribers</span>
+                </div>
+              )}
             </div>
           </motion.div>
 
