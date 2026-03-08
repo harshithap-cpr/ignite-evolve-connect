@@ -212,10 +212,135 @@ const ProblemStatementWizard = () => {
                 <Textarea value={proposedSolution} onChange={(e) => setProposedSolution(e.target.value)} placeholder="Describe your solution. What will it do? How will users benefit?" className="mt-1.5 rounded-xl min-h-[120px]" />
                 <p className="text-xs text-muted-foreground mt-1">💡 Tip: Focus on what makes your approach different and better.</p>
               </div>
-              <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit}>
-                <Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI
-              </Button>
-              {!canSubmit && (title.length > 0 || problemStatement.length > 0 || proposedSolution.length > 0) && (
+
+              {/* Show analyze button if user can still use free or is paid */}
+              {(canAnalyze || isPaid) ? (
+                <>
+                  <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit}>
+                    <Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI
+                  </Button>
+                  {!isPaid && remainingFree > 0 && (
+                    <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center border border-spark-amber/20">
+                      ⚠️ You have <strong>{remainingFree} free analysis</strong> remaining. Subscribe for unlimited access.
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* FREE LIMIT REACHED — show plans + payment right here */
+                <div className="space-y-5 border-t border-border pt-5">
+                  <div className="text-center space-y-3">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                      <Crown className="w-7 h-7 text-primary" />
+                    </div>
+                    <h3 className="font-display font-bold text-xl text-card-foreground">
+                      Free Analysis Limit Reached
+                    </h3>
+                    <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                      You've used your 2 free analyses. Subscribe to continue analyzing ideas and unlock detailed reports.
+                    </p>
+                  </div>
+
+                  {/* Plan cards */}
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {upgradePlans.map((p) => (
+                      <div
+                        key={p.name}
+                        className={`rounded-xl border-2 p-4 transition-all cursor-pointer text-left ${
+                          selectedPlan?.name === p.name
+                            ? "border-primary bg-primary/5 shadow-md"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                        onClick={() => setSelectedPlan(p)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-display font-bold text-card-foreground">{p.name}</h4>
+                            <p className="text-xs text-muted-foreground">{p.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xl font-bold font-display text-card-foreground">{p.price}</span>
+                            <span className="text-xs text-muted-foreground">{p.period}</span>
+                          </div>
+                        </div>
+                        <ul className="space-y-1 mt-2">
+                          {p.features.map((f) => (
+                            <li key={f} className="flex items-center gap-2 text-xs text-card-foreground">
+                              <Check className="w-3.5 h-3.5 text-primary shrink-0" /> {f}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Payment section inline */}
+                  {selectedPlan ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="border-t border-border pt-5 space-y-5"
+                    >
+                      <h4 className="font-display font-bold text-lg text-card-foreground text-center flex items-center justify-center gap-2">
+                        <QrCode className="w-5 h-5 text-primary" />
+                        Pay {selectedPlan.price}{selectedPlan.period} for {selectedPlan.name}
+                      </h4>
+                      <div className="flex flex-col sm:flex-row items-center gap-6">
+                        <div className="bg-background border border-border rounded-xl p-4 shadow-sm shrink-0">
+                          <img src={qrCodeUrl} alt="UPI QR Code" width={200} height={200} className="rounded-lg" />
+                        </div>
+                        <div className="flex-1 w-full space-y-4">
+                          <div className="flex items-center gap-2 bg-muted rounded-lg px-4 py-3">
+                            <span className="text-sm text-muted-foreground">UPI ID:</span>
+                            <span className="font-mono font-semibold text-foreground flex-1">{UPI_ID}</span>
+                            <Button variant="ghost" size="icon" onClick={copyUpiId} className="shrink-0">
+                              {copied ? <CheckCircle className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                            </Button>
+                          </div>
+                          <a href={upiPaymentLink} className="block w-full">
+                            <Button variant="hero" className="w-full">
+                              <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan.price} via UPI App
+                            </Button>
+                          </a>
+                          <div className="border-t border-border pt-4 space-y-3">
+                            <p className="text-sm font-semibold text-card-foreground">After payment, enter your transaction ID:</p>
+                            <Input placeholder="Enter UPI Transaction ID" value={txnId} onChange={(e) => setTxnId(e.target.value)} />
+                            <Button
+                              variant="hero"
+                              className="w-full"
+                              disabled={!txnId.trim() || txnSubmitting}
+                              onClick={async () => {
+                                if (!user) { toast.error("Please sign in"); return; }
+                                setTxnSubmitting(true);
+                                const { error } = await supabase.from("subscriptions").insert({
+                                  user_id: user.id,
+                                  plan: selectedPlan.name.toLowerCase(),
+                                  status: "pending",
+                                  transaction_id: txnId.trim(),
+                                  amount: selectedPlan.amount,
+                                });
+                                setTxnSubmitting(false);
+                                if (error) { toast.error("Failed to submit"); return; }
+                                toast.success("Payment submitted! We'll verify & activate within 24 hours.");
+                                setSelectedPlan(null);
+                                setTxnId("");
+                              }}
+                            >
+                              {txnSubmitting ? "Submitting..." : "Submit for Verification"}
+                            </Button>
+                            <p className="text-xs text-muted-foreground text-center">
+                              Or <a href="/payment-verification" className="text-primary underline">upload screenshot</a> for faster verification.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center animate-pulse">👆 Select a plan above to see payment options</p>
+                  )}
+                </div>
+              )}
+
+              {!canSubmit && (title.length > 0 || problemStatement.length > 0 || proposedSolution.length > 0) && (canAnalyze || isPaid) && (
                 <div className="p-3 bg-destructive/10 rounded-xl text-sm text-destructive text-center space-y-1">
                   {title.length === 0 && <p>• Please enter a title for your idea</p>}
                   {problemStatement.length <= 10 && <p>• Problem statement needs at least 10 characters ({problemStatement.length}/10)</p>}
