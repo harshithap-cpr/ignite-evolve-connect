@@ -8,422 +8,383 @@ import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  ChevronLeft,
-  ChevronRight,
   Lightbulb,
-  Target,
-  Puzzle,
-  Users,
   Sparkles,
-  CheckCircle2,
   ArrowRight,
   TrendingUp,
+  Target,
+  Users,
+  Swords,
+  Star,
+  AlertTriangle,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-interface WizardData {
-  title: string;
-  problem_statement: string;
-  who_affected: string;
-  current_solutions: string;
-  proposed_solution: string;
-  how_it_works: string;
-  target_audience: string;
-  unique_value: string;
-  market_size: string;
-  tags: string;
-  is_public: boolean;
+interface Analysis {
+  market_value: string;
+  market_growth: string;
+  target_customers: { segment: string; size: string; pain_level: string }[];
+  competing_apps: { name: string; description: string; weakness: string }[];
+  innovation_score: number;
+  feasibility_score: number;
+  market_score: number;
+  overall_score: number;
+  strengths: string[];
+  improvements: string[];
+  verdict: string;
 }
 
-const steps = [
-  { key: "problem", label: "Define Problem", icon: Lightbulb, emoji: "💡" },
-  { key: "solution", label: "Your Solution", icon: Puzzle, emoji: "🔧" },
-  { key: "market", label: "Market & Audience", icon: Target, emoji: "🎯" },
-  { key: "unique", label: "Unique Value", icon: Sparkles, emoji: "✨" },
-  { key: "review", label: "Review & Submit", icon: CheckCircle2, emoji: "🚀" },
-];
+const ScoreBar = ({ label, score, color }: { label: string; score: number; color: string }) => (
+  <div className="flex items-center gap-3">
+    <span className="w-24 text-sm text-muted-foreground">{label}</span>
+    <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+      <motion.div
+        initial={{ width: 0 }}
+        animate={{ width: `${score * 10}%` }}
+        transition={{ duration: 1, delay: 0.3 }}
+        className={`h-full ${color} rounded-full`}
+      />
+    </div>
+    <span className="font-bold text-foreground w-8 text-right">{score}/10</span>
+  </div>
+);
 
 const ProblemStatementWizard = () => {
-  const [step, setStep] = useState(0);
-  const [data, setData] = useState<WizardData>({
-    title: "",
-    problem_statement: "",
-    who_affected: "",
-    current_solutions: "",
-    proposed_solution: "",
-    how_it_works: "",
-    target_audience: "",
-    unique_value: "",
-    market_size: "",
-    tags: "",
-    is_public: true,
-  });
-  const [submitted, setSubmitted] = useState(false);
-  const [scores, setScores] = useState({ innovation: 0, feasibility: 0, market: 0, overall: 0 });
+  const [title, setTitle] = useState("");
+  const [problemStatement, setProblemStatement] = useState("");
+  const [proposedSolution, setProposedSolution] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [saved, setSaved] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const update = (field: keyof WizardData, value: string | boolean) => {
-    setData((prev) => ({ ...prev, [field]: value }));
-  };
+  const canSubmit = title.length > 0 && problemStatement.length > 10 && proposedSolution.length > 10;
 
-  const calculateScores = () => {
-    let innovation = 0, feasibility = 0, market = 0;
-    if (data.problem_statement.length > 50) innovation += 2;
-    if (data.problem_statement.length > 150) innovation += 1;
-    if (data.proposed_solution.length > 50) innovation += 2;
-    if (data.how_it_works.length > 30) innovation += 2;
-    if (data.unique_value.length > 30) innovation += 3;
+  const handleAnalyze = async () => {
+    if (!canSubmit) return;
 
-    if (data.target_audience.length > 20) feasibility += 3;
-    if (data.proposed_solution.length > 100) feasibility += 2;
-    if (data.how_it_works.length > 50) feasibility += 3;
-    if (data.tags.split(",").length >= 2) feasibility += 2;
+    setIsAnalyzing(true);
+    setAnalysis(null);
 
-    if (data.market_size.length > 10) market += 4;
-    if (data.target_audience.length > 30) market += 2;
-    if (data.who_affected.length > 20) market += 2;
-    if (data.current_solutions.length > 20) market += 2;
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-idea", {
+        body: { problem_statement: problemStatement, proposed_solution: proposedSolution },
+      });
 
-    return {
-      innovation: Math.min(innovation, 10),
-      feasibility: Math.min(feasibility, 10),
-      market: Math.min(market, 10),
-      overall: Math.min(Math.round((innovation + feasibility + market) / 3), 10),
-    };
-  };
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-  const canProceed = () => {
-    switch (step) {
-      case 0: return data.title.length > 0 && data.problem_statement.length > 0;
-      case 1: return data.proposed_solution.length > 0;
-      case 2: return data.target_audience.length > 0;
-      case 3: return true;
-      default: return true;
+      setAnalysis(data as Analysis);
+      toast.success("Analysis complete! 🎯");
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e.message || "Analysis failed. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSave = async () => {
     if (!user) {
       toast.error("Please sign in first");
       navigate("/auth");
       return;
     }
-
-    const s = calculateScores();
-    setScores(s);
-
-    const fullProblem = `${data.problem_statement}\n\nWho is affected: ${data.who_affected}\n\nCurrent solutions: ${data.current_solutions}`;
+    if (!analysis) return;
 
     const { error } = await supabase.from("ideas").insert({
       user_id: user.id,
-      title: data.title,
-      problem_statement: fullProblem,
-      proposed_solution: `${data.proposed_solution}\n\nHow it works: ${data.how_it_works}`,
-      target_audience: data.target_audience,
-      unique_value: data.unique_value,
-      market_size: data.market_size,
-      tags: data.tags.split(",").map((s) => s.trim()).filter(Boolean),
-      is_public: data.is_public,
-      innovation_score: s.innovation,
-      feasibility_score: s.feasibility,
-      market_score: s.market,
-      overall_score: s.overall,
+      title,
+      problem_statement: problemStatement,
+      proposed_solution: proposedSolution,
+      target_audience: analysis.target_customers.map((c) => c.segment).join(", "),
+      market_size: analysis.market_value,
+      unique_value: analysis.verdict,
+      innovation_score: analysis.innovation_score,
+      feasibility_score: analysis.feasibility_score,
+      market_score: analysis.market_score,
+      overall_score: analysis.overall_score,
+      feedback: JSON.stringify({ strengths: analysis.strengths, improvements: analysis.improvements, competing_apps: analysis.competing_apps }),
+      is_public: true,
+      tags: [],
     });
 
     if (error) {
-      toast.error("Submission failed. Try again.");
+      toast.error("Failed to save. Try again.");
     } else {
-      setSubmitted(true);
-      toast.success("Idea submitted successfully! 🎉");
+      setSaved(true);
+      toast.success("Idea saved successfully! 🎉");
     }
   };
 
-  const ScoreBar = ({ label, score, color }: { label: string; score: number; color: string }) => (
-    <div className="flex items-center gap-3">
-      <span className="w-24 text-sm text-muted-foreground">{label}</span>
-      <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${score * 10}%` }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className={`h-full ${color} rounded-full`}
-        />
-      </div>
-      <span className="font-bold text-foreground w-8 text-right">{score}/10</span>
-    </div>
-  );
-
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="pt-24 pb-16">
-          <div className="container mx-auto px-4 max-w-2xl">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-card rounded-2xl border border-border p-8 text-center"
-            >
-              <div className="text-6xl mb-4">🎉</div>
-              <h1 className="text-3xl font-bold font-display mb-2 text-foreground">Idea Submitted!</h1>
-              <p className="text-muted-foreground mb-8">Here's how your idea scored:</p>
-
-              <div className="space-y-4 mb-8 text-left">
-                <ScoreBar label="Innovation" score={scores.innovation} color="bg-primary" />
-                <ScoreBar label="Feasibility" score={scores.feasibility} color="bg-spark-teal" />
-                <ScoreBar label="Market" score={scores.market} color="bg-spark-amber" />
-                <div className="pt-2 border-t border-border">
-                  <ScoreBar label="Overall" score={scores.overall} color="bg-gradient-warm" />
-                </div>
-              </div>
-
-              <h2 className="font-display font-bold text-lg mb-4 text-foreground">🧭 What to Do Next</h2>
-              <div className="space-y-3 text-left mb-8">
-                {[
-                  { step: "1", title: "Validate Your Problem", desc: "Talk to at least 20 potential users to confirm the problem exists", route: "/mentors", cta: "Find a Mentor" },
-                  { step: "2", title: "Join a Hackathon", desc: "Build a prototype in a competitive environment with team support", route: "/hackathons", cta: "Browse Hackathons" },
-                  { step: "3", title: "Take Relevant Courses", desc: "Upskill in areas that strengthen your solution", route: "/courses", cta: "Explore Courses" },
-                  { step: "4", title: "Protect Your IP", desc: "If your solution is novel, consider filing a patent", route: "/patents", cta: "Register Patent" },
-                  { step: "5", title: "Connect with Investors", desc: "When your MVP is ready, pitch to investors for funding", route: "/investors", cta: "Find Investors" },
-                ].map((item) => (
-                  <div key={item.step} className="flex gap-3 p-3 bg-secondary/50 rounded-xl">
-                    <div className="w-8 h-8 rounded-full bg-gradient-warm text-primary-foreground flex items-center justify-center text-sm font-bold shrink-0">
-                      {item.step}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-sm text-foreground">{item.title}</h3>
-                      <p className="text-xs text-muted-foreground">{item.desc}</p>
-                    </div>
-                    <Button variant="outline" size="sm" className="shrink-0 self-center" onClick={() => navigate(item.route)}>
-                      {item.cta}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="hero" className="flex-1" onClick={() => navigate("/ideas")}>
-                  View My Ideas <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => { setSubmitted(false); setStep(0); setData({ title: "", problem_statement: "", who_affected: "", current_solutions: "", proposed_solution: "", how_it_works: "", target_audience: "", unique_value: "", market_size: "", tags: "", is_public: true }); }}>
-                  Submit Another
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const handleReset = () => {
+    setTitle("");
+    setProblemStatement("");
+    setProposedSolution("");
+    setAnalysis(null);
+    setSaved(false);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-2xl">
+        <div className="container mx-auto px-4 max-w-3xl">
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-bold font-display mb-2">
-              Submit Your <span className="text-gradient-warm">Problem Statement</span>
+              AI-Powered <span className="text-gradient-warm">Idea Analyzer</span>
             </h1>
-            <p className="text-muted-foreground">We'll guide you step by step and score your idea automatically.</p>
+            <p className="text-muted-foreground">
+              Just enter your problem & solution — our AI will analyze market value, competitors, target customers, and score your idea.
+            </p>
           </div>
 
-          {/* Progress */}
-          <div className="flex items-center justify-between mb-8 max-w-md mx-auto">
-            {steps.map((s, i) => (
-              <div key={s.key} className="flex items-center">
-                <button
-                  onClick={() => i <= step && setStep(i)}
-                  className={`flex flex-col items-center transition-all ${i <= step ? "opacity-100" : "opacity-40"}`}
-                >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
-                    i < step ? "bg-spark-teal/20 text-spark-teal" :
-                    i === step ? "bg-primary/20 text-primary ring-2 ring-primary" :
-                    "bg-muted text-muted-foreground"
-                  }`}>
-                    {i < step ? <CheckCircle2 className="w-5 h-5" /> : s.emoji}
-                  </div>
-                  <span className="text-[10px] mt-1 text-muted-foreground hidden sm:block">{s.label}</span>
-                </button>
-                {i < steps.length - 1 && (
-                  <div className={`w-8 sm:w-12 h-0.5 mx-1 ${i < step ? "bg-spark-teal" : "bg-border"}`} />
-                )}
+          {/* Input Form */}
+          {!analysis && !isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-card rounded-2xl border border-border p-6 md:p-8 space-y-5"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Lightbulb className="w-5 h-5 text-primary" />
+                <h2 className="font-display font-bold text-xl text-card-foreground">Tell Us Your Idea</h2>
               </div>
-            ))}
-          </div>
 
-          {/* Step content */}
-          <div className="bg-card rounded-2xl border border-border p-6 md:p-8">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                {step === 0 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Lightbulb className="w-5 h-5 text-primary" />
-                      <h2 className="font-display font-bold text-xl text-card-foreground">Define the Problem</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground">A great innovation starts with a clearly defined problem. Be as specific as possible.</p>
+              <div>
+                <Label>Give your idea a title *</Label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., AI-Powered Crop Disease Detector" className="mt-1.5 rounded-xl" />
+              </div>
 
-                    <div>
-                      <Label>Give your idea a title *</Label>
-                      <Input value={data.title} onChange={(e) => update("title", e.target.value)} placeholder="e.g., AI-Powered Crop Disease Detector" className="mt-1.5 rounded-xl" />
-                    </div>
-                    <div>
-                      <Label>What problem are you solving? *</Label>
-                      <Textarea value={data.problem_statement} onChange={(e) => update("problem_statement", e.target.value)} placeholder="Describe the problem in detail. What pain point exists? Why does it matter?" className="mt-1.5 rounded-xl min-h-[100px]" />
-                      <p className="text-xs text-muted-foreground mt-1">💡 Tip: Start with "Many people struggle with..." or "Currently, there is no way to..."</p>
-                    </div>
-                    <div>
-                      <Label>Who is affected by this problem?</Label>
-                      <Input value={data.who_affected} onChange={(e) => update("who_affected", e.target.value)} placeholder="e.g., Small-scale farmers in rural India" className="mt-1.5 rounded-xl" />
-                    </div>
-                    <div>
-                      <Label>What existing solutions exist (and why aren't they enough)?</Label>
-                      <Textarea value={data.current_solutions} onChange={(e) => update("current_solutions", e.target.value)} placeholder="e.g., Manual inspection by experts — too expensive and slow" className="mt-1.5 rounded-xl" />
-                    </div>
-                  </div>
-                )}
+              <div>
+                <Label>What problem are you solving? *</Label>
+                <Textarea
+                  value={problemStatement}
+                  onChange={(e) => setProblemStatement(e.target.value)}
+                  placeholder="Describe the problem in detail. What pain point exists? Why does it matter? Who is affected?"
+                  className="mt-1.5 rounded-xl min-h-[120px]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">💡 Tip: Be specific about who faces this problem and why current solutions fail.</p>
+              </div>
 
-                {step === 1 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Puzzle className="w-5 h-5 text-spark-amber" />
-                      <h2 className="font-display font-bold text-xl text-card-foreground">Describe Your Solution</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Now explain how you plan to solve this problem. Don't worry about technical details yet.</p>
+              <div>
+                <Label>What is your proposed solution? *</Label>
+                <Textarea
+                  value={proposedSolution}
+                  onChange={(e) => setProposedSolution(e.target.value)}
+                  placeholder="Describe your solution. What will it do? How will users benefit? How does it work?"
+                  className="mt-1.5 rounded-xl min-h-[120px]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">💡 Tip: Focus on what makes your approach different and better.</p>
+              </div>
 
-                    <div>
-                      <Label>What is your proposed solution? *</Label>
-                      <Textarea value={data.proposed_solution} onChange={(e) => update("proposed_solution", e.target.value)} placeholder="Describe your solution. What will it do? How will users benefit?" className="mt-1.5 rounded-xl min-h-[120px]" />
-                      <p className="text-xs text-muted-foreground mt-1">💡 Tip: Focus on the "what" before the "how"</p>
-                    </div>
-                    <div>
-                      <Label>How does it work (briefly)?</Label>
-                      <Textarea value={data.how_it_works} onChange={(e) => update("how_it_works", e.target.value)} placeholder="e.g., Users take a photo of the crop → AI analyzes → Returns diagnosis in 5 seconds" className="mt-1.5 rounded-xl" />
-                      <p className="text-xs text-muted-foreground mt-1">💡 Tip: Use simple steps like "Step 1 → Step 2 → Step 3"</p>
-                    </div>
-                  </div>
-                )}
-
-                {step === 2 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Target className="w-5 h-5 text-spark-coral" />
-                      <h2 className="font-display font-bold text-xl text-card-foreground">Market & Audience</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Understanding your market helps mentors and investors see the potential.</p>
-
-                    <div>
-                      <Label>Who is your target audience? *</Label>
-                      <Input value={data.target_audience} onChange={(e) => update("target_audience", e.target.value)} placeholder="e.g., 120M smallholder farmers in India" className="mt-1.5 rounded-xl" />
-                    </div>
-                    <div>
-                      <Label>Estimated market size</Label>
-                      <Input value={data.market_size} onChange={(e) => update("market_size", e.target.value)} placeholder="e.g., ₹5,000 Cr addressable market in India" className="mt-1.5 rounded-xl" />
-                      <p className="text-xs text-muted-foreground mt-1">💡 Tip: Google "market size [your industry] India" for estimates</p>
-                    </div>
-                    <div>
-                      <Label>Tags (comma-separated)</Label>
-                      <Input value={data.tags} onChange={(e) => update("tags", e.target.value)} placeholder="AgriTech, AI, Mobile, Rural" className="mt-1.5 rounded-xl" />
-                    </div>
-                  </div>
-                )}
-
-                {step === 3 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-5 h-5 text-spark-lavender" />
-                      <h2 className="font-display font-bold text-xl text-card-foreground">What Makes You Unique?</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground">This is your competitive edge. Why will people choose your solution over alternatives?</p>
-
-                    <div>
-                      <Label>Unique Value Proposition</Label>
-                      <Textarea value={data.unique_value} onChange={(e) => update("unique_value", e.target.value)} placeholder="e.g., First offline-capable AI crop disease detection that works without internet in rural areas with 95% accuracy" className="mt-1.5 rounded-xl min-h-[100px]" />
-                      <p className="text-xs text-muted-foreground mt-1">💡 Tip: Complete this sentence: "Unlike [alternatives], our solution..."</p>
-                    </div>
-
-                    <div className="flex items-center gap-2 p-3 bg-secondary/50 rounded-xl">
-                      <input type="checkbox" id="is_public" checked={data.is_public} onChange={(e) => update("is_public", e.target.checked)} className="rounded" />
-                      <Label htmlFor="is_public" className="text-sm cursor-pointer">
-                        Make this idea public (visible on leaderboard for community voting)
-                      </Label>
-                    </div>
-                  </div>
-                )}
-
-                {step === 4 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle2 className="w-5 h-5 text-spark-teal" />
-                      <h2 className="font-display font-bold text-xl text-card-foreground">Review & Submit</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Review your submission before we score it.</p>
-
-                    <div className="space-y-3">
-                      {[
-                        { label: "Title", value: data.title },
-                        { label: "Problem", value: data.problem_statement },
-                        { label: "Affected", value: data.who_affected },
-                        { label: "Solution", value: data.proposed_solution },
-                        { label: "How it works", value: data.how_it_works },
-                        { label: "Audience", value: data.target_audience },
-                        { label: "Market Size", value: data.market_size },
-                        { label: "Unique Value", value: data.unique_value },
-                      ].filter((item) => item.value).map((item) => (
-                        <div key={item.label} className="p-3 bg-secondary/30 rounded-xl">
-                          <span className="text-xs font-bold text-muted-foreground uppercase">{item.label}</span>
-                          <p className="text-sm text-card-foreground mt-0.5 line-clamp-3">{item.value}</p>
-                        </div>
-                      ))}
-                      {data.tags && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {data.tags.split(",").map((t) => t.trim()).filter(Boolean).map((tag) => (
-                            <Badge key={tag} variant="secondary">{tag}</Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {!user && (
-                      <div className="p-4 bg-spark-amber/10 rounded-xl text-sm text-spark-amber">
-                        ⚠️ You need to sign in before submitting. Your data will be saved.
-                      </div>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-4 border-t border-border">
-              <Button variant="ghost" onClick={() => setStep(step - 1)} disabled={step === 0}>
-                <ChevronLeft className="w-4 h-4 mr-1" /> Back
+              <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit}>
+                <Sparkles className="w-5 h-5 mr-2" />
+                Analyze My Idea with AI
               </Button>
 
-              {step < steps.length - 1 ? (
-                <Button variant="hero" onClick={() => setStep(step + 1)} disabled={!canProceed()}>
-                  Next Step <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              ) : (
-                <Button variant="hero" onClick={handleSubmit}>
-                  <TrendingUp className="w-4 h-4 mr-1" /> Score & Submit
-                </Button>
+              {!user && (
+                <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center">
+                  ⚠️ Sign in to save your analysis. You can still analyze without signing in.
+                </div>
               )}
-            </div>
-          </div>
+            </motion.div>
+          )}
+
+          {/* Loading State */}
+          {isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-card rounded-2xl border border-border p-12 text-center"
+            >
+              <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+              <h2 className="font-display font-bold text-xl text-card-foreground mb-2">Analyzing Your Idea...</h2>
+              <p className="text-muted-foreground text-sm">Our AI is evaluating market potential, identifying competitors, and scoring your idea.</p>
+              <div className="flex justify-center gap-2 mt-6">
+                {["Market Research", "Competitor Analysis", "Scoring"].map((s, i) => (
+                  <motion.div
+                    key={s}
+                    initial={{ opacity: 0.3 }}
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.5 }}
+                  >
+                    <Badge variant="secondary" className="text-xs">{s}</Badge>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Analysis Results */}
+          {analysis && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              {/* Title & Verdict */}
+              <div className="bg-card rounded-2xl border border-border p-6 md:p-8">
+                <h2 className="font-display font-bold text-2xl text-card-foreground mb-1">{title}</h2>
+                <p className="text-muted-foreground text-sm mb-4">{analysis.verdict}</p>
+
+                {/* Scores */}
+                <div className="space-y-3">
+                  <ScoreBar label="Innovation" score={analysis.innovation_score} color="bg-primary" />
+                  <ScoreBar label="Feasibility" score={analysis.feasibility_score} color="bg-spark-teal" />
+                  <ScoreBar label="Market" score={analysis.market_score} color="bg-spark-amber" />
+                  <div className="pt-2 border-t border-border">
+                    <ScoreBar label="Overall" score={analysis.overall_score} color="bg-gradient-warm" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Market Value */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-5 h-5 text-spark-teal" />
+                  <h3 className="font-display font-bold text-lg text-card-foreground">Market Opportunity</h3>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-spark-teal/10 rounded-xl">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">Total Market Value</p>
+                    <p className="text-2xl font-bold text-spark-teal mt-1">{analysis.market_value}</p>
+                  </div>
+                  <div className="p-4 bg-primary/10 rounded-xl">
+                    <p className="text-xs text-muted-foreground uppercase font-bold">Growth Rate</p>
+                    <p className="text-2xl font-bold text-primary mt-1">{analysis.market_growth}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Target Customers */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="w-5 h-5 text-spark-coral" />
+                  <h3 className="font-display font-bold text-lg text-card-foreground">Target Customers</h3>
+                </div>
+                <div className="space-y-3">
+                  {analysis.target_customers.map((c, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl">
+                      <div>
+                        <p className="font-semibold text-sm text-card-foreground">{c.segment}</p>
+                        <p className="text-xs text-muted-foreground">{c.size}</p>
+                      </div>
+                      <Badge variant={c.pain_level === "High" ? "destructive" : c.pain_level === "Medium" ? "default" : "secondary"}>
+                        {c.pain_level} Pain
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Competing Apps */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Swords className="w-5 h-5 text-spark-amber" />
+                  <h3 className="font-display font-bold text-lg text-card-foreground">Competing Solutions</h3>
+                </div>
+                <div className="space-y-3">
+                  {analysis.competing_apps.map((c, i) => (
+                    <div key={i} className="p-3 bg-secondary/50 rounded-xl">
+                      <p className="font-semibold text-sm text-card-foreground">{c.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{c.description}</p>
+                      <p className="text-xs text-spark-amber mt-1">⚡ Weakness: {c.weakness}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Strengths & Improvements */}
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="bg-card rounded-2xl border border-border p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Star className="w-5 h-5 text-spark-teal" />
+                    <h3 className="font-display font-bold text-lg text-card-foreground">Strengths</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {analysis.strengths.map((s, i) => (
+                      <div key={i} className="flex gap-2 text-sm">
+                        <CheckCircle2 className="w-4 h-4 text-spark-teal shrink-0 mt-0.5" />
+                        <span className="text-card-foreground">{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-card rounded-2xl border border-border p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <AlertTriangle className="w-5 h-5 text-spark-amber" />
+                    <h3 className="font-display font-bold text-lg text-card-foreground">Improvements</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {analysis.improvements.map((s, i) => (
+                      <div key={i} className="flex gap-2 text-sm">
+                        <ArrowRight className="w-4 h-4 text-spark-amber shrink-0 mt-0.5" />
+                        <span className="text-card-foreground">{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* What's Next */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <h3 className="font-display font-bold text-lg text-card-foreground mb-4">🧭 What to Do Next</h3>
+                <div className="space-y-3">
+                  {[
+                    { step: "1", title: "Validate Your Problem", desc: "Talk to at least 20 potential users to confirm the problem exists", route: "/mentors", cta: "Find a Mentor" },
+                    { step: "2", title: "Join a Hackathon", desc: "Build a prototype in a competitive environment", route: "/hackathons", cta: "Browse Hackathons" },
+                    { step: "3", title: "Take Relevant Courses", desc: "Upskill in areas that strengthen your solution", route: "/courses", cta: "Explore Courses" },
+                    { step: "4", title: "Protect Your IP", desc: "If your solution is novel, consider filing a patent", route: "/patents", cta: "Register Patent" },
+                    { step: "5", title: "Connect with Investors", desc: "When your MVP is ready, pitch to investors", route: "/investors", cta: "Find Investors" },
+                  ].map((item) => (
+                    <div key={item.step} className="flex gap-3 p-3 bg-secondary/50 rounded-xl">
+                      <div className="w-8 h-8 rounded-full bg-gradient-warm text-primary-foreground flex items-center justify-center text-sm font-bold shrink-0">
+                        {item.step}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-card-foreground">{item.title}</h4>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                      <Button variant="outline" size="sm" className="shrink-0 self-center" onClick={() => navigate(item.route)}>
+                        {item.cta}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3">
+                {!saved ? (
+                  <>
+                    <Button variant="hero" className="flex-1" onClick={handleSave}>
+                      <CheckCircle2 className="w-4 h-4 mr-1" /> Save to My Ideas
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={handleReset}>
+                      Analyze Another Idea
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="hero" className="flex-1" onClick={() => navigate("/ideas")}>
+                      View My Ideas <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={handleReset}>
+                      Analyze Another
+                    </Button>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
       <Footer />
