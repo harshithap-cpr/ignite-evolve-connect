@@ -30,6 +30,7 @@ interface Course {
   is_premium: boolean;
   avg_rating: number;
   total_ratings: number;
+  video_url: string | null;
 }
 
 const diffColors: Record<string, string> = {
