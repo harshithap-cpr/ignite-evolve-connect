@@ -54,8 +54,8 @@ const Footer = () => {
 
         <div className="border-t border-background/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-background/40">
           <div className="text-center sm:text-left">
-            <p>© {new Date().getFullYear()} Innvo Spark Guidance™. All rights reserved.</p>
-            <p className="text-[11px] mt-0.5">Innvo Spark Guidance is a registered trademark. Unauthorized reproduction or distribution of any content on this platform is strictly prohibited.</p>
+            <p>© {new Date().getFullYear()} Innovo Spark Guidance™. All rights reserved.</p>
+            <p className="text-[11px] mt-0.5">Innovo Spark Guidance is a registered trademark. Unauthorized reproduction or distribution of any content on this platform is strictly prohibited.</p>
           </div>
           <div className="flex gap-4 shrink-0">
             <Link to="/terms" className="hover:text-background/60 transition-colors">Terms</Link>

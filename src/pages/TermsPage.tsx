@@ -59,7 +59,7 @@ const TermsPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">10. Limitation of Liability</h2>
-              <p>Innvo Spark Guidance is provided "as is" without warranties. We are not liable for any business decisions made based on platform data or AI recommendations. Maximum liability is limited to the amount paid by the user in the past 12 months.</p>
+              <p>Innovo Spark Guidance is provided "as is" without warranties. We are not liable for any business decisions made based on platform data or AI recommendations. Maximum liability is limited to the amount paid by the user in the past 12 months.</p>
             </section>
 
             <section>

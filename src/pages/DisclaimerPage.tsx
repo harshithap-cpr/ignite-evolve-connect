@@ -43,7 +43,7 @@ const DisclaimerPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">Third-Party Content</h2>
-              <p>Mentor advice, course content, and investor information are provided by third parties. Innvo Spark Guidance does not endorse or verify the accuracy of third-party content.</p>
+              <p>Mentor advice, course content, and investor information are provided by third parties. Innovo Spark Guidance does not endorse or verify the accuracy of third-party content.</p>
             </section>
 
             <p className="text-xs text-muted-foreground pt-4 border-t border-border">Last updated: March 8, 2026</p>
