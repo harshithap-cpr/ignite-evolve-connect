@@ -34,7 +34,7 @@ const TermsPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">5. Mentorship & Bookings</h2>
-              <p>Mentor sessions are facilitated through the platform. Spark Guidance is not responsible for the quality of advice provided by mentors. Cancellation and refund policies apply as stated at the time of booking.</p>
+              <p>Mentor sessions are facilitated through the platform. Innvo Spark Guidance is not responsible for the quality of advice provided by mentors. Cancellation and refund policies apply as stated at the time of booking.</p>
             </section>
 
             <section>
