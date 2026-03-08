@@ -44,7 +44,7 @@ const TermsPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">7. Patent Registration</h2>
-              <p>Patent tracking features are organizational tools only. Innvo Spark Guidance does not provide legal patent filing services. Users should consult a registered patent attorney for official filings.</p>
+              <p>Patent tracking features are organizational tools only. Innovo Spark Guidance does not provide legal patent filing services. Users should consult a registered patent attorney for official filings.</p>
             </section>
 
             <section>
