@@ -363,9 +363,40 @@ const ProblemStatementWizard = () => {
                         <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan?.price} via UPI App
                       </Button>
                     </a>
-                    <p className="text-xs text-muted-foreground text-center">
-                      After payment, share the transaction ID with us for activation. Supports Google Pay, PhonePe, Paytm & all UPI apps.
-                    </p>
+                    <div className="w-full border-t border-border pt-4 space-y-3">
+                      <p className="text-sm font-semibold text-card-foreground text-center">After payment, submit your transaction ID below:</p>
+                      <Input
+                        placeholder="Enter UPI Transaction ID"
+                        value={txnId}
+                        onChange={(e) => setTxnId(e.target.value)}
+                      />
+                      <Button
+                        variant="hero"
+                        className="w-full"
+                        disabled={!txnId.trim() || txnSubmitting}
+                        onClick={async () => {
+                          if (!user) { toast.error("Please sign in"); return; }
+                          setTxnSubmitting(true);
+                          const { error } = await supabase.from("subscriptions").insert({
+                            user_id: user.id,
+                            plan: selectedPlan?.name.toLowerCase() || "pro",
+                            status: "pending",
+                            transaction_id: txnId.trim(),
+                            amount: selectedPlan?.amount || 99,
+                          });
+                          setTxnSubmitting(false);
+                          if (error) { toast.error("Failed to submit"); return; }
+                          toast.success("Payment submitted! We'll verify & activate within 24 hours.");
+                          setSelectedPlan(null);
+                          setTxnId("");
+                        }}
+                      >
+                        {txnSubmitting ? "Submitting..." : "Submit for Verification"}
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center">
+                        Or <a href="/payment-verification" className="text-primary underline">upload screenshot</a> for faster verification.
+                      </p>
+                    </div>
                   </div>
                 </DialogContent>
               </Dialog>
