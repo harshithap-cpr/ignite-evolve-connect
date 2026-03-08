@@ -54,6 +54,7 @@ const App = () => (
             <Route path="/teams" element={<TeamsPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
+            <Route path="/payment-verification" element={<PaymentVerificationPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AppFeedback />
