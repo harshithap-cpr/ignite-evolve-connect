@@ -47,6 +47,7 @@ const CoursesPage = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [ratingCourse, setRatingCourse] = useState<Course | null>(null);
+  const [videoCourse, setVideoCourse] = useState<Course | null>(null);
   const [userRating, setUserRating] = useState(0);
   const [userReview, setUserReview] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
