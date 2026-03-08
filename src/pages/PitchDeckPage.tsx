@@ -333,6 +333,9 @@ const PitchDeckPage = () => {
               <Button variant="outline" onClick={() => setShowElevatorPitch(!showElevatorPitch)}>
                 <Mic className="w-4 h-4 mr-1" /> Elevator Pitch
               </Button>
+              <Button variant="outline" onClick={exportToPDF}>
+                <Download className="w-4 h-4 mr-1" /> Export PDF
+              </Button>
               <Button variant="hero" onClick={() => { setCurrentSlide(0); setIsPresenting(true); }}>
                 <Presentation className="w-4 h-4 mr-1" /> Present
               </Button>
