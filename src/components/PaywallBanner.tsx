@@ -192,9 +192,12 @@ const PaywallBanner = ({ feature, remainingFree, canUse, isPaid, defaultShowPlan
             </div>
             <a href={upiPaymentLink} className="w-full">
               <Button variant="hero" className="w-full">
-                <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan?.price} via UPI App
+                <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan?.price} via GPay / PhonePe / Paytm
               </Button>
             </a>
+            <p className="text-xs text-muted-foreground text-center">
+              Opens your installed UPI payment app directly. No WhatsApp needed.
+            </p>
             <div className="w-full border-t border-border pt-4 space-y-3">
               <p className="text-sm font-semibold text-card-foreground text-center">After payment, submit your transaction ID:</p>
               <Input
