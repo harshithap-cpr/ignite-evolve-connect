@@ -9,7 +9,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 const HeroSection = () => {
   const [demoOpen, setDemoOpen] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active");
+      setSubscriberCount(count || 0);
+    };
+    fetchCount();
+  }, []);
 
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-hero overflow-hidden">
