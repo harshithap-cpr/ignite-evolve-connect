@@ -34,8 +34,14 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useUsageGate } from "@/hooks/use-usage-gate";
-import PaywallBanner from "@/components/PaywallBanner";
-import { Crown, Lock } from "lucide-react";
+import { Crown, Lock, Check, Copy, CheckCircle, QrCode, IndianRupee } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface EthicalAnalysis {
   privacy_concern: string;
