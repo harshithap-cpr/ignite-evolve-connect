@@ -56,6 +56,7 @@ const App = () => (
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/payment-verification" element={<PaymentVerificationPage />} />
+            <Route path="/admin/payments" element={<AdminPaymentsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AppFeedback />
