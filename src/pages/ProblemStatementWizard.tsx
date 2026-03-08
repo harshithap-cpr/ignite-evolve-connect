@@ -109,8 +109,28 @@ const ProblemStatementWizard = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setAnalysis(data as Analysis);
+      const analysisData = data as Analysis;
+      setAnalysis(analysisData);
       toast.success("Analysis complete! 🎯");
+
+      // Auto-save for logged-in users
+      if (user) {
+        const { error: saveError } = await supabase.from("ideas").insert({
+          user_id: user.id, title, problem_statement: problemStatement, proposed_solution: proposedSolution,
+          target_audience: analysisData.target_customers.map((c) => c.segment).join(", "),
+          market_size: analysisData.market_value, unique_value: analysisData.verdict,
+          innovation_score: analysisData.innovation_score, feasibility_score: analysisData.feasibility_score,
+          market_score: analysisData.market_score, overall_score: analysisData.overall_score,
+          feedback: JSON.stringify({ strengths: analysisData.strengths, improvements: analysisData.improvements, competing_apps: analysisData.competing_apps, ethical_analysis: analysisData.ethical_analysis, novelty_analysis: analysisData.novelty_analysis, ethical_score: analysisData.ethical_score, novelty_score: analysisData.novelty_score }),
+          is_public: true, tags: [],
+        });
+        if (saveError) {
+          console.error("Auto-save failed:", saveError);
+        } else {
+          setSaved(true);
+          toast.success("Idea saved automatically! 🎉");
+        }
+      }
     } catch (e: any) {
       console.error(e);
       toast.error(e.message || "Analysis failed. Please try again.");
