@@ -14,7 +14,7 @@ const TermsPage = () => {
           <div className="prose prose-sm max-w-none text-muted-foreground space-y-6">
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">1. Acceptance of Terms</h2>
-              <p>By creating an account or using Innvo Spark Guidance, you agree to these Terms & Conditions. If you do not agree, do not use the platform.</p>
+              <p>By creating an account or using Innovo Spark Guidance, you agree to these Terms & Conditions. If you do not agree, do not use the platform.</p>
             </section>
 
             <section>
