@@ -23,6 +23,7 @@ const moreLinks = [
   { label: "Submit Idea", href: "/submit-idea" },
   { label: "Idea Lab", href: "/ideas" },
   { label: "Patents", href: "/patents" },
+  { label: "Copyrights", href: "/copyrights" },
   { label: "Investors", href: "/investors" },
 ];
 
