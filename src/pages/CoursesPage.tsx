@@ -225,6 +225,39 @@ const CoursesPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Video Player Dialog */}
+      <Dialog open={!!videoCourse} onOpenChange={() => setVideoCourse(null)}>
+        <DialogContent className="rounded-2xl max-w-3xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Play className="w-5 h-5 text-primary" />
+              {videoCourse?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-4 pb-4">
+            {videoCourse?.video_url ? (
+              <div className="aspect-video rounded-xl overflow-hidden bg-muted">
+                <iframe
+                  src={videoCourse.video_url}
+                  title={videoCourse.title}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="aspect-video rounded-xl bg-muted flex items-center justify-center">
+                <p className="text-muted-foreground text-sm">Video coming soon!</p>
+              </div>
+            )}
+            <div className="mt-3">
+              <p className="text-sm text-muted-foreground">by {videoCourse?.instructor}</p>
+              <p className="text-sm text-card-foreground mt-1">{videoCourse?.description}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
