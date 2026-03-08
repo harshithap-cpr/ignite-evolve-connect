@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-illustration.jpg";
+import DemoWalkthrough from "@/components/DemoWalkthrough";
 
 const HeroSection = () => {
+  const [demoOpen, setDemoOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-hero overflow-hidden">
-      {/* Decorative blobs */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-glow-pulse" />
       <div className="absolute bottom-10 right-10 w-96 h-96 bg-spark-coral/10 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: "1s" }} />
 
@@ -33,11 +38,11 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button variant="hero" size="lg" className="text-base px-8">
-                Start for Free
+              <Button variant="hero" size="lg" className="text-base px-8" onClick={() => navigate("/submit-idea")}>
+                Submit Your Idea
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
-              <Button variant="hero-outline" size="lg" className="text-base px-8">
+              <Button variant="hero-outline" size="lg" className="text-base px-8" onClick={() => setDemoOpen(true)}>
                 <Play className="w-4 h-4 mr-1" />
                 Watch Demo
               </Button>
@@ -67,14 +72,8 @@ const HeroSection = () => {
             className="relative"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-warm">
-              <img
-                src={heroImage}
-                alt="Innovators collaborating on projects"
-                className="w-full h-auto"
-                loading="eager"
-              />
+              <img src={heroImage} alt="Innovators collaborating on projects" className="w-full h-auto" loading="eager" />
             </div>
-            {/* Floating stat cards */}
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -94,6 +93,8 @@ const HeroSection = () => {
           </motion.div>
         </div>
       </div>
+
+      <DemoWalkthrough open={demoOpen} onOpenChange={setDemoOpen} />
     </section>
   );
 };

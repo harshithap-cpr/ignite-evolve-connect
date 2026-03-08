@@ -12,6 +12,7 @@ import CoursesPage from "./pages/CoursesPage";
 import PatentsPage from "./pages/PatentsPage";
 import IdeasPage from "./pages/IdeasPage";
 import InvestorsPage from "./pages/InvestorsPage";
+import ProblemStatementWizard from "./pages/ProblemStatementWizard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/patents" element={<PatentsPage />} />
             <Route path="/ideas" element={<IdeasPage />} />
             <Route path="/investors" element={<InvestorsPage />} />
+            <Route path="/submit-idea" element={<ProblemStatementWizard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
