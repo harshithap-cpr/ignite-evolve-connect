@@ -104,8 +104,6 @@ const ProblemStatementWizard = () => {
 
   const handleAnalyze = async () => {
     if (!canSubmit) return;
-    if (!user) { toast.error("Please sign in to use AI analysis"); navigate("/auth"); return; }
-    if (!isPaid) { toast.error("AI Analysis requires a Pro or Premium plan"); return; }
     setIsAnalyzing(true);
     setAnalysis(null);
     try {
@@ -197,22 +195,8 @@ const ProblemStatementWizard = () => {
                 <Textarea value={proposedSolution} onChange={(e) => setProposedSolution(e.target.value)} placeholder="Describe your solution. What will it do? How will users benefit?" className="mt-1.5 rounded-xl min-h-[120px]" />
                 <p className="text-xs text-muted-foreground mt-1">💡 Tip: Focus on what makes your approach different and better.</p>
               </div>
-              {user && !isPaid && !subLoading && (
-                <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 text-center space-y-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <Lock className="w-5 h-5 text-primary" />
-                    <p className="font-bold text-foreground">AI Analysis requires a paid plan</p>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Upgrade to Pro (₹99/mo) or Premium (₹250/mo) to unlock AI-powered idea analysis.</p>
-                  <Button variant="hero" size="sm" onClick={() => navigate("/#pricing")}>
-                    <Crown className="w-4 h-4 mr-2" /> View Plans
-                  </Button>
-                </div>
-              )}
-              <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit || !isPaid || subLoading}>
-                {!user ? <><Lock className="w-5 h-5 mr-2" /> Sign in to Analyze</> :
-                 !isPaid ? <><Lock className="w-5 h-5 mr-2" /> Upgrade to Analyze</> :
-                 <><Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI</>}
+              <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit}>
+                <Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI
               </Button>
               {!canSubmit && (title.length > 0 || problemStatement.length > 0 || proposedSolution.length > 0) && (
                 <div className="p-3 bg-destructive/10 rounded-xl text-sm text-destructive text-center space-y-1">
@@ -223,7 +207,7 @@ const ProblemStatementWizard = () => {
               )}
               {!user && (
                 <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center">
-                  ⚠️ Sign in and subscribe to a paid plan to use AI analysis.
+                  ⚠️ Sign in to save your analysis and unlock detailed reports with a subscription.
                 </div>
               )}
             </motion.div>
@@ -248,241 +232,299 @@ const ProblemStatementWizard = () => {
           {/* Results */}
           {analysis && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-              {/* Scores */}
+              {/* Basic Scores - visible to all */}
               <div className="bg-card rounded-2xl border border-border p-6 md:p-8">
-                <h2 className="font-display font-bold text-2xl text-card-foreground mb-1">{title}</h2>
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="font-display font-bold text-2xl text-card-foreground">{title}</h2>
+                  {!isPaid && (
+                    <Badge variant="secondary" className="text-xs">
+                      Basic Report
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-muted-foreground text-sm mb-4">{analysis.verdict}</p>
                 <div className="space-y-3">
-                  <ScoreBar label="Innovation" score={analysis.innovation_score} color="bg-primary" />
-                  <ScoreBar label="Feasibility" score={analysis.feasibility_score} color="bg-spark-teal" />
-                  <ScoreBar label="Market" score={analysis.market_score} color="bg-spark-amber" />
-                  <ScoreBar label="Ethics" score={analysis.ethical_score} color="bg-emerald-500" />
-                  <ScoreBar label="Novelty" score={analysis.novelty_score} color="bg-violet-500" />
-                  <div className="pt-2 border-t border-border">
-                    <ScoreBar label="Overall" score={analysis.overall_score} color="bg-gradient-warm" />
-                  </div>
+                  <ScoreBar label="Overall" score={analysis.overall_score} color="bg-gradient-warm" />
                 </div>
               </div>
 
-              {/* Ethical Analysis */}
-              <div className="bg-card rounded-2xl border border-border p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Shield className="w-5 h-5 text-emerald-500" />
-                  <h3 className="font-display font-bold text-lg text-card-foreground">Ethical Analysis</h3>
-                  <Badge variant="outline" className={riskColors[analysis.ethical_analysis.risk_level]}>
-                    {analysis.ethical_analysis.risk_level} Risk
-                  </Badge>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-3 bg-secondary/50 rounded-xl">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Fingerprint className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-xs font-bold text-muted-foreground uppercase">Privacy</p>
-                    </div>
-                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.privacy_concern}</p>
+              {/* Upgrade CTA for free users */}
+              {!isPaid && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-card rounded-2xl border-2 border-primary/30 p-8 text-center space-y-4"
+                >
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                    <Crown className="w-8 h-8 text-primary" />
                   </div>
-                  <div className="p-3 bg-secondary/50 rounded-xl">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Users className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-xs font-bold text-muted-foreground uppercase">Social Impact</p>
-                    </div>
-                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.social_impact}</p>
-                  </div>
-                  <div className="p-3 bg-secondary/50 rounded-xl">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Scale className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-xs font-bold text-muted-foreground uppercase">Fairness</p>
-                    </div>
-                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.fairness}</p>
-                  </div>
-                  <div className="p-3 bg-secondary/50 rounded-xl">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Leaf className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-xs font-bold text-muted-foreground uppercase">Environment</p>
-                    </div>
-                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.environmental_impact}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Novelty Analysis */}
-              <div className="bg-card rounded-2xl border border-border p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Gem className="w-5 h-5 text-violet-500" />
-                  <h3 className="font-display font-bold text-lg text-card-foreground">Novelty & Originality</h3>
-                  <Badge variant="outline" className={riskColors[analysis.novelty_analysis.patentability === "High" ? "Low" : analysis.novelty_analysis.patentability === "Low" ? "High" : "Medium"]}>
-                    {analysis.novelty_analysis.patentability} Patentability
-                  </Badge>
-                </div>
-                <div className="space-y-3">
-                  <div className="p-3 bg-secondary/50 rounded-xl">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Award className="w-4 h-4 text-violet-500" />
-                      <p className="text-xs font-bold text-muted-foreground uppercase">Uniqueness</p>
-                    </div>
-                    <p className="text-sm text-card-foreground">{analysis.novelty_analysis.uniqueness}</p>
-                  </div>
-                  <div className="p-3 bg-secondary/50 rounded-xl">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <FileSearch className="w-4 h-4 text-muted-foreground" />
-                      <p className="text-xs font-bold text-muted-foreground uppercase">Prior Art</p>
-                    </div>
-                    <p className="text-sm text-card-foreground">{analysis.novelty_analysis.prior_art}</p>
-                  </div>
-                  <div className="p-3 bg-violet-500/10 rounded-xl">
-                    <p className="text-xs font-bold text-muted-foreground uppercase mb-1">Key Differentiator</p>
-                    <p className="text-sm font-medium text-card-foreground">{analysis.novelty_analysis.differentiator}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Market Value */}
-              <div className="bg-card rounded-2xl border border-border p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-5 h-5 text-spark-teal" />
-                  <h3 className="font-display font-bold text-lg text-card-foreground">Market Opportunity</h3>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-spark-teal/10 rounded-xl">
-                    <p className="text-xs text-muted-foreground uppercase font-bold">Total Market Value</p>
-                    <p className="text-2xl font-bold text-spark-teal mt-1">{analysis.market_value}</p>
-                  </div>
-                  <div className="p-4 bg-primary/10 rounded-xl">
-                    <p className="text-xs text-muted-foreground uppercase font-bold">Growth Rate</p>
-                    <p className="text-2xl font-bold text-primary mt-1">{analysis.market_growth}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Target Customers */}
-              <div className="bg-card rounded-2xl border border-border p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-spark-coral" />
-                  <h3 className="font-display font-bold text-lg text-card-foreground">Target Customers</h3>
-                </div>
-                <div className="space-y-3">
-                  {analysis.target_customers.map((c, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl">
-                      <div>
-                        <p className="font-semibold text-sm text-card-foreground">{c.segment}</p>
-                        <p className="text-xs text-muted-foreground">{c.size}</p>
+                  <h3 className="font-display font-bold text-xl text-card-foreground">
+                    Unlock the Full Detailed Report
+                  </h3>
+                  <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                    Subscribe to <strong>Pro (₹99/mo)</strong> or <strong>Premium (₹250/mo)</strong> to access:
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-2 max-w-md mx-auto text-left">
+                    {[
+                      "Individual Score Breakdown",
+                      "Ethical Analysis & Risk Level",
+                      "Novelty & Patentability Check",
+                      "Market Opportunity & Growth",
+                      "Target Customer Segments",
+                      "Competitor Analysis",
+                      "Strengths & Improvements",
+                      "Pitch Deck Generation",
+                    ].map((feature) => (
+                      <div key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Lock className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <span>{feature}</span>
                       </div>
-                      <Badge variant={c.pain_level === "High" ? "destructive" : c.pain_level === "Medium" ? "default" : "secondary"}>
-                        {c.pain_level} Pain
+                    ))}
+                  </div>
+                  <Button variant="hero" size="lg" onClick={() => navigate("/#pricing")}>
+                    <Crown className="w-5 h-5 mr-2" /> Upgrade Now
+                  </Button>
+                </motion.div>
+              )}
+
+              {/* Detailed sections - only for paid users */}
+              {isPaid && (
+                <>
+                  {/* Full Scores */}
+                  <div className="bg-card rounded-2xl border border-border p-6 md:p-8">
+                    <h3 className="font-display font-bold text-lg text-card-foreground mb-3">Detailed Scores</h3>
+                    <div className="space-y-3">
+                      <ScoreBar label="Innovation" score={analysis.innovation_score} color="bg-primary" />
+                      <ScoreBar label="Feasibility" score={analysis.feasibility_score} color="bg-spark-teal" />
+                      <ScoreBar label="Market" score={analysis.market_score} color="bg-spark-amber" />
+                      <ScoreBar label="Ethics" score={analysis.ethical_score} color="bg-emerald-500" />
+                      <ScoreBar label="Novelty" score={analysis.novelty_score} color="bg-violet-500" />
+                    </div>
+                  </div>
+
+                  {/* Ethical Analysis */}
+                  <div className="bg-card rounded-2xl border border-border p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Shield className="w-5 h-5 text-emerald-500" />
+                      <h3 className="font-display font-bold text-lg text-card-foreground">Ethical Analysis</h3>
+                      <Badge variant="outline" className={riskColors[analysis.ethical_analysis.risk_level]}>
+                        {analysis.ethical_analysis.risk_level} Risk
                       </Badge>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Competing Apps */}
-              <div className="bg-card rounded-2xl border border-border p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Swords className="w-5 h-5 text-spark-amber" />
-                  <h3 className="font-display font-bold text-lg text-card-foreground">Competing Solutions</h3>
-                </div>
-                <div className="space-y-3">
-                  {analysis.competing_apps.map((c, i) => (
-                    <div key={i} className="p-3 bg-secondary/50 rounded-xl">
-                      <p className="font-semibold text-sm text-card-foreground">{c.name}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{c.description}</p>
-                      <p className="text-xs text-spark-amber mt-1">⚡ Weakness: {c.weakness}</p>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="p-3 bg-secondary/50 rounded-xl">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Fingerprint className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-xs font-bold text-muted-foreground uppercase">Privacy</p>
+                        </div>
+                        <p className="text-sm text-card-foreground">{analysis.ethical_analysis.privacy_concern}</p>
+                      </div>
+                      <div className="p-3 bg-secondary/50 rounded-xl">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-xs font-bold text-muted-foreground uppercase">Social Impact</p>
+                        </div>
+                        <p className="text-sm text-card-foreground">{analysis.ethical_analysis.social_impact}</p>
+                      </div>
+                      <div className="p-3 bg-secondary/50 rounded-xl">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Scale className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-xs font-bold text-muted-foreground uppercase">Fairness</p>
+                        </div>
+                        <p className="text-sm text-card-foreground">{analysis.ethical_analysis.fairness}</p>
+                      </div>
+                      <div className="p-3 bg-secondary/50 rounded-xl">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Leaf className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-xs font-bold text-muted-foreground uppercase">Environment</p>
+                        </div>
+                        <p className="text-sm text-card-foreground">{analysis.ethical_analysis.environmental_impact}</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Strengths & Improvements */}
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="bg-card rounded-2xl border border-border p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Star className="w-5 h-5 text-spark-teal" />
-                    <h3 className="font-display font-bold text-lg text-card-foreground">Strengths</h3>
-                  </div>
-                  <div className="space-y-2">
-                    {analysis.strengths.map((s, i) => (
-                      <div key={i} className="flex gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-spark-teal shrink-0 mt-0.5" />
-                        <span className="text-card-foreground">{s}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="bg-card rounded-2xl border border-border p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <AlertTriangle className="w-5 h-5 text-spark-amber" />
-                    <h3 className="font-display font-bold text-lg text-card-foreground">Improvements</h3>
-                  </div>
-                  <div className="space-y-2">
-                    {analysis.improvements.map((s, i) => (
-                      <div key={i} className="flex gap-2 text-sm">
-                        <ArrowRight className="w-4 h-4 text-spark-amber shrink-0 mt-0.5" />
-                        <span className="text-card-foreground">{s}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* What's Next */}
-              <div className="bg-card rounded-2xl border border-border p-6">
-                <h3 className="font-display font-bold text-lg text-card-foreground mb-4">🧭 What to Do Next</h3>
-                <div className="space-y-3">
-                  {[
-                    { step: "1", title: "Validate Your Problem", desc: "Talk to at least 20 potential users", route: "/mentors", cta: "Find a Mentor" },
-                    { step: "2", title: "Join a Hackathon", desc: "Build a prototype in a competitive environment", route: "/hackathons", cta: "Browse Hackathons" },
-                    { step: "3", title: "Take Relevant Courses", desc: "Upskill in areas that strengthen your solution", route: "/courses", cta: "Explore Courses" },
-                    { step: "4", title: "Protect Your IP", desc: "If your solution is novel, consider filing a patent", route: "/patents", cta: "Register Patent" },
-                    { step: "5", title: "Connect with Investors", desc: "When your MVP is ready, pitch to investors", route: "/investors", cta: "Find Investors" },
-                  ].map((item) => (
-                    <div key={item.step} className="flex gap-3 p-3 bg-secondary/50 rounded-xl">
-                      <div className="w-8 h-8 rounded-full bg-gradient-warm text-primary-foreground flex items-center justify-center text-sm font-bold shrink-0">
-                        {item.step}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm text-card-foreground">{item.title}</h4>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
-                      </div>
-                      <Button variant="outline" size="sm" className="shrink-0 self-center" onClick={() => navigate(item.route)}>
-                        {item.cta}
-                      </Button>
+                  {/* Novelty Analysis */}
+                  <div className="bg-card rounded-2xl border border-border p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Gem className="w-5 h-5 text-violet-500" />
+                      <h3 className="font-display font-bold text-lg text-card-foreground">Novelty & Originality</h3>
+                      <Badge variant="outline" className={riskColors[analysis.novelty_analysis.patentability === "High" ? "Low" : analysis.novelty_analysis.patentability === "Low" ? "High" : "Medium"]}>
+                        {analysis.novelty_analysis.patentability} Patentability
+                      </Badge>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-secondary/50 rounded-xl">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Award className="w-4 h-4 text-violet-500" />
+                          <p className="text-xs font-bold text-muted-foreground uppercase">Uniqueness</p>
+                        </div>
+                        <p className="text-sm text-card-foreground">{analysis.novelty_analysis.uniqueness}</p>
+                      </div>
+                      <div className="p-3 bg-secondary/50 rounded-xl">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <FileSearch className="w-4 h-4 text-muted-foreground" />
+                          <p className="text-xs font-bold text-muted-foreground uppercase">Prior Art</p>
+                        </div>
+                        <p className="text-sm text-card-foreground">{analysis.novelty_analysis.prior_art}</p>
+                      </div>
+                      <div className="p-3 bg-violet-500/10 rounded-xl">
+                        <p className="text-xs font-bold text-muted-foreground uppercase mb-1">Key Differentiator</p>
+                        <p className="text-sm font-medium text-card-foreground">{analysis.novelty_analysis.differentiator}</p>
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Actions */}
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="hero"
-                  className="flex-1 min-w-[180px]"
-                  onClick={() => navigate("/pitch-deck", {
-                    state: {
-                      title,
-                      problemStatement,
-                      proposedSolution,
-                      analysis,
-                    },
-                  })}
-                >
-                  <Presentation className="w-4 h-4 mr-1" /> Generate Pitch Deck
-                </Button>
-                {!saved ? (
-                  <>
-                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleSave}>
-                      <CheckCircle2 className="w-4 h-4 mr-1" /> Save to My Ideas
+                  {/* Market Value */}
+                  <div className="bg-card rounded-2xl border border-border p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <TrendingUp className="w-5 h-5 text-spark-teal" />
+                      <h3 className="font-display font-bold text-lg text-card-foreground">Market Opportunity</h3>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="p-4 bg-spark-teal/10 rounded-xl">
+                        <p className="text-xs text-muted-foreground uppercase font-bold">Total Market Value</p>
+                        <p className="text-2xl font-bold text-spark-teal mt-1">{analysis.market_value}</p>
+                      </div>
+                      <div className="p-4 bg-primary/10 rounded-xl">
+                        <p className="text-xs text-muted-foreground uppercase font-bold">Growth Rate</p>
+                        <p className="text-2xl font-bold text-primary mt-1">{analysis.market_growth}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Target Customers */}
+                  <div className="bg-card rounded-2xl border border-border p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Target className="w-5 h-5 text-spark-coral" />
+                      <h3 className="font-display font-bold text-lg text-card-foreground">Target Customers</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {analysis.target_customers.map((c, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl">
+                          <div>
+                            <p className="font-semibold text-sm text-card-foreground">{c.segment}</p>
+                            <p className="text-xs text-muted-foreground">{c.size}</p>
+                          </div>
+                          <Badge variant={c.pain_level === "High" ? "destructive" : c.pain_level === "Medium" ? "default" : "secondary"}>
+                            {c.pain_level} Pain
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Competing Apps */}
+                  <div className="bg-card rounded-2xl border border-border p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Swords className="w-5 h-5 text-spark-amber" />
+                      <h3 className="font-display font-bold text-lg text-card-foreground">Competing Solutions</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {analysis.competing_apps.map((c, i) => (
+                        <div key={i} className="p-3 bg-secondary/50 rounded-xl">
+                          <p className="font-semibold text-sm text-card-foreground">{c.name}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{c.description}</p>
+                          <p className="text-xs text-spark-amber mt-1">⚡ Weakness: {c.weakness}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Strengths & Improvements */}
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="bg-card rounded-2xl border border-border p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Star className="w-5 h-5 text-spark-teal" />
+                        <h3 className="font-display font-bold text-lg text-card-foreground">Strengths</h3>
+                      </div>
+                      <div className="space-y-2">
+                        {analysis.strengths.map((s, i) => (
+                          <div key={i} className="flex gap-2 text-sm">
+                            <CheckCircle2 className="w-4 h-4 text-spark-teal shrink-0 mt-0.5" />
+                            <span className="text-card-foreground">{s}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-card rounded-2xl border border-border p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <AlertTriangle className="w-5 h-5 text-spark-amber" />
+                        <h3 className="font-display font-bold text-lg text-card-foreground">Improvements</h3>
+                      </div>
+                      <div className="space-y-2">
+                        {analysis.improvements.map((s, i) => (
+                          <div key={i} className="flex gap-2 text-sm">
+                            <ArrowRight className="w-4 h-4 text-spark-amber shrink-0 mt-0.5" />
+                            <span className="text-card-foreground">{s}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* What's Next */}
+                  <div className="bg-card rounded-2xl border border-border p-6">
+                    <h3 className="font-display font-bold text-lg text-card-foreground mb-4">🧭 What to Do Next</h3>
+                    <div className="space-y-3">
+                      {[
+                        { step: "1", title: "Validate Your Problem", desc: "Talk to at least 20 potential users", route: "/mentors", cta: "Find a Mentor" },
+                        { step: "2", title: "Join a Hackathon", desc: "Build a prototype in a competitive environment", route: "/hackathons", cta: "Browse Hackathons" },
+                        { step: "3", title: "Take Relevant Courses", desc: "Upskill in areas that strengthen your solution", route: "/courses", cta: "Explore Courses" },
+                        { step: "4", title: "Protect Your IP", desc: "If your solution is novel, consider filing a patent", route: "/patents", cta: "Register Patent" },
+                        { step: "5", title: "Connect with Investors", desc: "When your MVP is ready, pitch to investors", route: "/investors", cta: "Find Investors" },
+                      ].map((item) => (
+                        <div key={item.step} className="flex gap-3 p-3 bg-secondary/50 rounded-xl">
+                          <div className="w-8 h-8 rounded-full bg-gradient-warm text-primary-foreground flex items-center justify-center text-sm font-bold shrink-0">
+                            {item.step}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-sm text-card-foreground">{item.title}</h4>
+                            <p className="text-xs text-muted-foreground">{item.desc}</p>
+                          </div>
+                          <Button variant="outline" size="sm" className="shrink-0 self-center" onClick={() => navigate(item.route)}>
+                            {item.cta}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      variant="hero"
+                      className="flex-1 min-w-[180px]"
+                      onClick={() => navigate("/pitch-deck", {
+                        state: { title, problemStatement, proposedSolution, analysis },
+                      })}
+                    >
+                      <Presentation className="w-4 h-4 mr-1" /> Generate Pitch Deck
                     </Button>
-                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleReset}>Analyze Another Idea</Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={() => navigate("/ideas")}>
-                      View My Ideas <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleReset}>Analyze Another</Button>
-                  </>
-                )}
-              </div>
+                    {!saved ? (
+                      <>
+                        <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleSave}>
+                          <CheckCircle2 className="w-4 h-4 mr-1" /> Save to My Ideas
+                        </Button>
+                        <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleReset}>Analyze Another Idea</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="outline" className="flex-1 min-w-[150px]" onClick={() => navigate("/ideas")}>
+                          View My Ideas <ArrowRight className="w-4 h-4 ml-1" />
+                        </Button>
+                        <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleReset}>Analyze Another</Button>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Free user actions */}
+              {!isPaid && (
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleReset}>Analyze Another Idea</Button>
+                </div>
+              )}
             </motion.div>
           )}
         </div>
