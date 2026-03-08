@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtime } from "@/hooks/use-realtime";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,14 @@ const IdeasPage = () => {
   };
 
   useEffect(() => { fetchIdeas(); }, [user]);
+
+  // Realtime: refresh ideas when any idea changes
+  useRealtime({
+    table: "ideas",
+    onInsert: () => fetchIdeas(),
+    onUpdate: () => fetchIdeas(),
+    onDelete: () => fetchIdeas(),
+  });
 
   const calculateScores = (data: typeof formData) => {
     let innovation = 0, feasibility = 0, market = 0;
