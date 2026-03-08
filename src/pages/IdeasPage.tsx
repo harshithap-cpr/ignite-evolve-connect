@@ -312,6 +312,130 @@ const IdeasPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Full Analysis Dialog */}
+      <Dialog open={!!detailIdea} onOpenChange={() => setDetailIdea(null)}>
+        <DialogContent className="rounded-2xl max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display">{detailIdea?.title} — Full Analysis</DialogTitle>
+            <DialogDescription>Complete AI-generated analysis saved for your idea.</DialogDescription>
+          </DialogHeader>
+          {detailIdea && (() => {
+            let feedback: any = null;
+            try { feedback = JSON.parse(detailIdea.feedback || ""); } catch {}
+            if (!feedback) return <p className="text-muted-foreground text-sm">No detailed analysis data saved for this idea.</p>;
+            return (
+              <div className="space-y-5 mt-2">
+                {/* Scores */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-1"><Star className="w-4 h-4 text-primary" /> Scores</h4>
+                  {[
+                    { label: "Innovation", score: detailIdea.innovation_score, color: "bg-primary" },
+                    { label: "Feasibility", score: detailIdea.feasibility_score, color: "bg-spark-teal" },
+                    { label: "Market", score: detailIdea.market_score, color: "bg-spark-amber" },
+                    ...(feedback.ethical_score ? [{ label: "Ethics", score: feedback.ethical_score, color: "bg-emerald-500" }] : []),
+                    ...(feedback.novelty_score ? [{ label: "Novelty", score: feedback.novelty_score, color: "bg-violet-500" }] : []),
+                    { label: "Overall", score: detailIdea.overall_score, color: "bg-gradient-warm" },
+                  ].map(s => <ScoreBar key={s.label} {...s} />)}
+                </div>
+
+                {/* Market Info */}
+                {detailIdea.market_size && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-foreground flex items-center gap-1 mb-2"><TrendingUp className="w-4 h-4 text-spark-teal" /> Market</h4>
+                    <p className="text-sm text-muted-foreground">TAM: <span className="font-bold text-foreground">{detailIdea.market_size}</span></p>
+                    <p className="text-sm text-muted-foreground mt-1">Verdict: {detailIdea.unique_value}</p>
+                  </div>
+                )}
+
+                {/* Ethical Analysis */}
+                {feedback.ethical_analysis && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-foreground flex items-center gap-1 mb-2"><Shield className="w-4 h-4 text-emerald-500" /> Ethical Analysis</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(feedback.ethical_analysis).filter(([k]) => k !== "risk_level").map(([key, val]) => (
+                        <div key={key} className="p-2 bg-secondary/50 rounded-lg">
+                          <p className="text-xs font-bold text-muted-foreground uppercase">{key.replace(/_/g, " ")}</p>
+                          <p className="text-xs text-foreground mt-0.5">{val as string}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <Badge variant="outline" className="mt-2 text-xs">{feedback.ethical_analysis.risk_level} Risk</Badge>
+                  </div>
+                )}
+
+                {/* Novelty Analysis */}
+                {feedback.novelty_analysis && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-foreground flex items-center gap-1 mb-2"><Gem className="w-4 h-4 text-violet-500" /> Novelty & Originality</h4>
+                    <div className="space-y-2">
+                      {Object.entries(feedback.novelty_analysis).filter(([k]) => k !== "patentability").map(([key, val]) => (
+                        <div key={key} className="p-2 bg-secondary/50 rounded-lg">
+                          <p className="text-xs font-bold text-muted-foreground uppercase">{key.replace(/_/g, " ")}</p>
+                          <p className="text-xs text-foreground mt-0.5">{val as string}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <Badge variant="outline" className="mt-2 text-xs">{feedback.novelty_analysis.patentability} Patentability</Badge>
+                  </div>
+                )}
+
+                {/* Competitors */}
+                {feedback.competing_apps && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-foreground flex items-center gap-1 mb-2"><Swords className="w-4 h-4 text-spark-amber" /> Competitors</h4>
+                    {feedback.competing_apps.map((c: any, i: number) => (
+                      <div key={i} className="p-2 bg-secondary/50 rounded-lg mb-1.5">
+                        <p className="text-xs font-bold text-foreground">{c.name}</p>
+                        <p className="text-xs text-muted-foreground">{c.description}</p>
+                        <p className="text-xs text-spark-amber">⚡ {c.weakness}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Strengths & Improvements */}
+                <div className="grid grid-cols-2 gap-3">
+                  {feedback.strengths && (
+                    <div>
+                      <h4 className="font-semibold text-xs text-foreground flex items-center gap-1 mb-1"><CheckCircle2 className="w-3 h-3 text-spark-teal" /> Strengths</h4>
+                      {feedback.strengths.map((s: string, i: number) => (
+                        <p key={i} className="text-xs text-muted-foreground flex gap-1"><span className="text-spark-teal">•</span> {s}</p>
+                      ))}
+                    </div>
+                  )}
+                  {feedback.improvements && (
+                    <div>
+                      <h4 className="font-semibold text-xs text-foreground flex items-center gap-1 mb-1"><AlertTriangle className="w-3 h-3 text-spark-amber" /> Improvements</h4>
+                      {feedback.improvements.map((s: string, i: number) => (
+                        <p key={i} className="text-xs text-muted-foreground flex gap-1"><span className="text-spark-amber">•</span> {s}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-2">
+                  <Button variant="hero" size="sm" className="flex-1 gap-1" onClick={() => {
+                    setDetailIdea(null);
+                    navigate("/pitch-deck", {
+                      state: { title: detailIdea.title, problemStatement: detailIdea.problem_statement, proposedSolution: detailIdea.proposed_solution, analysis: { ...feedback, innovation_score: detailIdea.innovation_score, feasibility_score: detailIdea.feasibility_score, market_score: detailIdea.market_score, overall_score: detailIdea.overall_score, market_value: detailIdea.market_size, verdict: detailIdea.unique_value } }
+                    });
+                  }}>
+                    <Presentation className="w-4 h-4" /> Generate Pitch Deck
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    navigator.clipboard.writeText(JSON.stringify({ title: detailIdea.title, problem: detailIdea.problem_statement, solution: detailIdea.proposed_solution, scores: { innovation: detailIdea.innovation_score, feasibility: detailIdea.feasibility_score, market: detailIdea.market_score, overall: detailIdea.overall_score }, ...feedback }, null, 2));
+                    toast.success("Analysis copied to clipboard!");
+                  }}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
