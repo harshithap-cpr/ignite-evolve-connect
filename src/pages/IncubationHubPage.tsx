@@ -111,6 +111,7 @@ const IncubationHubPage = () => {
         message: regMessage || null,
       });
       if (error) throw error;
+      await recordUsage();
       toast.success(`Registered for ${registerDialog.name}!`);
       setMyRegistrations((prev) => new Set([...prev, registerDialog.id]));
       setRegisterDialog(null);

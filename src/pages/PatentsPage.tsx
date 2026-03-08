@@ -123,6 +123,7 @@ const PatentsPage = () => {
     if (error) {
       toast.error("Failed to register patent");
     } else {
+      await recordUsage();
       toast.success("Patent registered successfully! 📄");
       setShowForm(false);
       setFormData({ title: "", description: "", invention_type: "utility", inventors: "", keywords: "", notes: "" });

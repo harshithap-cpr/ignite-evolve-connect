@@ -115,6 +115,7 @@ const CopyrightsPage = () => {
     if (error) {
       toast.error("Failed to register copyright");
     } else {
+      await recordUsage();
       toast.success("Copyright registered successfully! ©");
       setShowForm(false);
       setFormData({ title: "", description: "", work_type: "literary", authors: "", keywords: "", notes: "" });
