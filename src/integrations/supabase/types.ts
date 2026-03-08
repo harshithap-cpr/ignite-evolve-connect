@@ -41,6 +41,54 @@ export type Database = {
         }
         Relationships: []
       }
+      copyrights: {
+        Row: {
+          authors: string[] | null
+          created_at: string
+          description: string | null
+          filing_date: string | null
+          id: string
+          keywords: string[] | null
+          notes: string | null
+          registration_number: string | null
+          stage: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          work_type: string | null
+        }
+        Insert: {
+          authors?: string[] | null
+          created_at?: string
+          description?: string | null
+          filing_date?: string | null
+          id?: string
+          keywords?: string[] | null
+          notes?: string | null
+          registration_number?: string | null
+          stage?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          work_type?: string | null
+        }
+        Update: {
+          authors?: string[] | null
+          created_at?: string
+          description?: string | null
+          filing_date?: string | null
+          id?: string
+          keywords?: string[] | null
+          notes?: string | null
+          registration_number?: string | null
+          stage?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          work_type?: string | null
+        }
+        Relationships: []
+      }
       course_ratings: {
         Row: {
           course_id: string
