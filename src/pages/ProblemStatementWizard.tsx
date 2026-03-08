@@ -287,12 +287,7 @@ const ProblemStatementWizard = () => {
                       </div>
                     ))}
                   </div>
-                  <Button variant="hero" size="lg" onClick={() => setShowUpgrade(true)}>
-                    <Crown className="w-5 h-5 mr-2" /> Upgrade Now
-                  </Button>
-                  {showUpgrade && (
-                    <PaywallBanner feature="analysis" remainingFree={0} canUse={false} isPaid={false} />
-                  )}
+                  <PaywallBanner feature="analysis" remainingFree={0} canUse={false} isPaid={false} defaultShowPlans />
                 </motion.div>
               )}
 
