@@ -266,7 +266,7 @@ const ProblemStatementWizard = () => {
               </div>
 
               {/* All-in-one Upgrade + Payment inline for free users */}
-              {!isPaid && (
+              {!isPaid && !canAnalyze && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
