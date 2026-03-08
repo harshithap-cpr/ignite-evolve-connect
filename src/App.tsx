@@ -42,6 +42,7 @@ const App = () => (
             <Route path="/submit-idea" element={<ProblemStatementWizard />} />
             <Route path="/pitch-deck" element={<PitchDeckPage />} />
             <Route path="/copyrights" element={<CopyrightsPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="*" element={<NotFound />} />
