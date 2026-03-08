@@ -104,6 +104,17 @@ const ProblemStatementWizard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [saved, setSaved] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: string; amount: number; period: string; description: string; features: string[] } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const UPI_ID = "hp123cpr@oksbi";
+  const upgradePlans = [
+    { name: "Pro", price: "₹99", amount: 99, period: "/month", description: "For serious innovators", features: ["Unlimited feature access", "Priority mentor booking", "All premium courses", "Team collaboration tools"] },
+    { name: "Premium", price: "₹250", amount: 250, period: "/month", description: "Full access + personal guidance", features: ["Everything in Pro", "Personal innovation mentor", "Investor pitch opportunities", "Priority support"] },
+  ];
+  const copyUpiId = async () => { await navigator.clipboard.writeText(UPI_ID); setCopied(true); toast.success("UPI ID copied!"); setTimeout(() => setCopied(false), 2000); };
+  const upiPaymentLink = selectedPlan ? `upi://pay?pa=${UPI_ID}&pn=InnovateSpark&am=${selectedPlan.amount}&cu=INR&tn=${selectedPlan.name}%20Plan%20Subscription` : "";
+  const qrCodeUrl = selectedPlan ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiPaymentLink)}` : "";
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isPaid, plan, loading: subLoading } = useSubscription();
