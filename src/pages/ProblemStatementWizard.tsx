@@ -34,8 +34,14 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useUsageGate } from "@/hooks/use-usage-gate";
-import PaywallBanner from "@/components/PaywallBanner";
-import { Crown, Lock } from "lucide-react";
+import { Crown, Lock, Check, Copy, CheckCircle, QrCode, IndianRupee } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface EthicalAnalysis {
   privacy_concern: string;
@@ -98,6 +104,17 @@ const ProblemStatementWizard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [saved, setSaved] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: string; amount: number; period: string; description: string; features: string[] } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const UPI_ID = "hp123cpr@oksbi";
+  const upgradePlans = [
+    { name: "Pro", price: "₹99", amount: 99, period: "/month", description: "For serious innovators", features: ["Unlimited feature access", "Priority mentor booking", "All premium courses", "Team collaboration tools"] },
+    { name: "Premium", price: "₹250", amount: 250, period: "/month", description: "Full access + personal guidance", features: ["Everything in Pro", "Personal innovation mentor", "Investor pitch opportunities", "Priority support"] },
+  ];
+  const copyUpiId = async () => { await navigator.clipboard.writeText(UPI_ID); setCopied(true); toast.success("UPI ID copied!"); setTimeout(() => setCopied(false), 2000); };
+  const upiPaymentLink = selectedPlan ? `upi://pay?pa=${UPI_ID}&pn=InnovateSpark&am=${selectedPlan.amount}&cu=INR&tn=${selectedPlan.name}%20Plan%20Subscription` : "";
+  const qrCodeUrl = selectedPlan ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiPaymentLink)}` : "";
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isPaid, plan, loading: subLoading } = useSubscription();
@@ -286,9 +303,72 @@ const ProblemStatementWizard = () => {
                       </div>
                     ))}
                   </div>
-                  <PaywallBanner feature="analysis" remainingFree={0} canUse={false} isPaid={false} defaultShowPlans />
+                  <div className="grid sm:grid-cols-2 gap-4 w-full max-w-lg mx-auto pt-2">
+                    {upgradePlans.map((p) => (
+                      <div
+                        key={p.name}
+                        className="rounded-xl border border-border p-4 hover:border-primary/50 transition-colors cursor-pointer text-left"
+                        onClick={() => setSelectedPlan(p)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-display font-bold text-card-foreground">{p.name}</h4>
+                            <p className="text-xs text-muted-foreground">{p.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xl font-bold font-display text-card-foreground">{p.price}</span>
+                            <span className="text-xs text-muted-foreground">{p.period}</span>
+                          </div>
+                        </div>
+                        <ul className="space-y-1 mt-2">
+                          {p.features.map((f) => (
+                            <li key={f} className="flex items-center gap-2 text-xs text-card-foreground">
+                              <Check className="w-3.5 h-3.5 text-primary shrink-0" /> {f}
+                            </li>
+                          ))}
+                        </ul>
+                        <Button variant="hero" size="sm" className="w-full mt-3" onClick={() => setSelectedPlan(p)}>
+                          <IndianRupee className="w-3.5 h-3.5 mr-1" /> Select {p.name}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </motion.div>
               )}
+
+              {/* Payment Dialog */}
+              <Dialog open={!!selectedPlan} onOpenChange={(open) => { if (!open) setSelectedPlan(null); }}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-xl">
+                      <QrCode className="w-5 h-5 text-primary" /> Pay for {selectedPlan?.name} Plan
+                    </DialogTitle>
+                    <DialogDescription>
+                      Scan the QR code or copy the UPI ID to pay <span className="font-semibold text-foreground">{selectedPlan?.price}{selectedPlan?.period}</span>
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col items-center gap-5 py-4">
+                    <div className="bg-background border border-border rounded-xl p-4 shadow-sm">
+                      <img src={qrCodeUrl} alt="UPI QR Code" width={220} height={220} className="rounded-lg" />
+                    </div>
+                    <div className="w-full flex items-center gap-2 bg-muted rounded-lg px-4 py-3">
+                      <span className="text-sm text-muted-foreground">UPI ID:</span>
+                      <span className="font-mono font-semibold text-foreground flex-1">{UPI_ID}</span>
+                      <Button variant="ghost" size="icon" onClick={copyUpiId} className="shrink-0">
+                        {copied ? <CheckCircle className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
+                      </Button>
+                    </div>
+                    <a href={upiPaymentLink} className="w-full">
+                      <Button variant="hero" className="w-full">
+                        <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan?.price} via UPI App
+                      </Button>
+                    </a>
+                    <p className="text-xs text-muted-foreground text-center">
+                      After payment, share the transaction ID with us for activation. Supports Google Pay, PhonePe, Paytm & all UPI apps.
+                    </p>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               {/* Detailed sections - only for paid users */}
               {isPaid && (
