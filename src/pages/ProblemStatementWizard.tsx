@@ -26,6 +26,7 @@ import {
   Gem,
   FileSearch,
   Award,
+  Presentation,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -405,20 +406,34 @@ const ProblemStatementWizard = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="hero"
+                  className="flex-1 min-w-[180px]"
+                  onClick={() => navigate("/pitch-deck", {
+                    state: {
+                      title,
+                      problemStatement,
+                      proposedSolution,
+                      analysis,
+                    },
+                  })}
+                >
+                  <Presentation className="w-4 h-4 mr-1" /> Generate Pitch Deck
+                </Button>
                 {!saved ? (
                   <>
-                    <Button variant="hero" className="flex-1" onClick={handleSave}>
+                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleSave}>
                       <CheckCircle2 className="w-4 h-4 mr-1" /> Save to My Ideas
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={handleReset}>Analyze Another Idea</Button>
+                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleReset}>Analyze Another Idea</Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="hero" className="flex-1" onClick={() => navigate("/ideas")}>
+                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={() => navigate("/ideas")}>
                       View My Ideas <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={handleReset}>Analyze Another</Button>
+                    <Button variant="outline" className="flex-1 min-w-[150px]" onClick={handleReset}>Analyze Another</Button>
                   </>
                 )}
               </div>

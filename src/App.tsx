@@ -13,6 +13,7 @@ import PatentsPage from "./pages/PatentsPage";
 import IdeasPage from "./pages/IdeasPage";
 import InvestorsPage from "./pages/InvestorsPage";
 import ProblemStatementWizard from "./pages/ProblemStatementWizard";
+import PitchDeckPage from "./pages/PitchDeckPage";
 import TermsPage from "./pages/TermsPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
 import NotFound from "./pages/NotFound";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/ideas" element={<IdeasPage />} />
             <Route path="/investors" element={<InvestorsPage />} />
             <Route path="/submit-idea" element={<ProblemStatementWizard />} />
+            <Route path="/pitch-deck" element={<PitchDeckPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="*" element={<NotFound />} />
