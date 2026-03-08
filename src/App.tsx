@@ -14,6 +14,7 @@ import IdeasPage from "./pages/IdeasPage";
 import InvestorsPage from "./pages/InvestorsPage";
 import ProblemStatementWizard from "./pages/ProblemStatementWizard";
 import PitchDeckPage from "./pages/PitchDeckPage";
+import CopyrightsPage from "./pages/CopyrightsPage";
 import TermsPage from "./pages/TermsPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
 import NotFound from "./pages/NotFound";
