@@ -221,7 +221,7 @@ const ProblemStatementWizard = () => {
                   </Button>
                   {!isPaid && remainingFree > 0 && (
                     <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center border border-spark-amber/20">
-                      ⚠️ You have <strong>{remainingFree} free analysis</strong> remaining. Subscribe for unlimited access.
+                      ⚠️ You have <strong>{remainingFree} free analysis</strong> remaining. Subscribe for unlimited access & full reports.
                     </div>
                   )}
                 </>
