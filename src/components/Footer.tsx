@@ -1,5 +1,6 @@
-import { Sparkles, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 const Footer = () => {
   return (
@@ -8,10 +9,10 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 font-display font-bold text-xl mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-warm flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden">
+                <img src={logo} alt="Innvo Spark Guidance" className="w-full h-full object-contain" />
               </div>
-              <span className="text-background">Spark Guidance</span>
+              <span className="text-background">Innvo Spark Guidance</span>
             </div>
             <p className="text-background/60 text-sm leading-relaxed max-w-sm mb-6">
               Empowering the next generation of innovators with mentorship, competitions, hackathons, and courses — all in one platform.
@@ -53,8 +54,8 @@ const Footer = () => {
 
         <div className="border-t border-background/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-background/40">
           <div className="text-center sm:text-left">
-            <p>© {new Date().getFullYear()} Spark Guidance™. All rights reserved.</p>
-            <p className="text-[11px] mt-0.5">Spark Guidance is a registered trademark. Unauthorized reproduction or distribution of any content on this platform is strictly prohibited.</p>
+            <p>© {new Date().getFullYear()} Innvo Spark Guidance™. All rights reserved.</p>
+            <p className="text-[11px] mt-0.5">Innvo Spark Guidance is a registered trademark. Unauthorized reproduction or distribution of any content on this platform is strictly prohibited.</p>
           </div>
           <div className="flex gap-4 shrink-0">
             <Link to="/terms" className="hover:text-background/60 transition-colors">Terms</Link>

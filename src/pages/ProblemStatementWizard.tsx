@@ -19,11 +19,33 @@ import {
   AlertTriangle,
   CheckCircle2,
   Loader2,
+  Shield,
+  Fingerprint,
+  Leaf,
+  Scale,
+  Gem,
+  FileSearch,
+  Award,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+
+interface EthicalAnalysis {
+  privacy_concern: string;
+  social_impact: string;
+  fairness: string;
+  environmental_impact: string;
+  risk_level: "Low" | "Medium" | "High";
+}
+
+interface NoveltyAnalysis {
+  uniqueness: string;
+  prior_art: string;
+  differentiator: string;
+  patentability: "High" | "Medium" | "Low";
+}
 
 interface Analysis {
   market_value: string;
@@ -33,7 +55,11 @@ interface Analysis {
   innovation_score: number;
   feasibility_score: number;
   market_score: number;
+  ethical_score: number;
+  novelty_score: number;
   overall_score: number;
+  ethical_analysis: EthicalAnalysis;
+  novelty_analysis: NoveltyAnalysis;
   strengths: string[];
   improvements: string[];
   verdict: string;
@@ -54,6 +80,12 @@ const ScoreBar = ({ label, score, color }: { label: string; score: number; color
   </div>
 );
 
+const riskColors: Record<string, string> = {
+  Low: "bg-spark-teal/10 text-spark-teal border-spark-teal/20",
+  Medium: "bg-spark-amber/10 text-spark-amber border-spark-amber/20",
+  High: "bg-spark-coral/10 text-spark-coral border-spark-coral/20",
+};
+
 const ProblemStatementWizard = () => {
   const [title, setTitle] = useState("");
   const [problemStatement, setProblemStatement] = useState("");
@@ -68,18 +100,14 @@ const ProblemStatementWizard = () => {
 
   const handleAnalyze = async () => {
     if (!canSubmit) return;
-
     setIsAnalyzing(true);
     setAnalysis(null);
-
     try {
       const { data, error } = await supabase.functions.invoke("analyze-idea", {
         body: { problem_statement: problemStatement, proposed_solution: proposedSolution },
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
       setAnalysis(data as Analysis);
       toast.success("Analysis complete! 🎯");
     } catch (e: any) {
@@ -91,105 +119,61 @@ const ProblemStatementWizard = () => {
   };
 
   const handleSave = async () => {
-    if (!user) {
-      toast.error("Please sign in first");
-      navigate("/auth");
-      return;
-    }
+    if (!user) { toast.error("Please sign in first"); navigate("/auth"); return; }
     if (!analysis) return;
-
     const { error } = await supabase.from("ideas").insert({
-      user_id: user.id,
-      title,
-      problem_statement: problemStatement,
-      proposed_solution: proposedSolution,
+      user_id: user.id, title, problem_statement: problemStatement, proposed_solution: proposedSolution,
       target_audience: analysis.target_customers.map((c) => c.segment).join(", "),
-      market_size: analysis.market_value,
-      unique_value: analysis.verdict,
-      innovation_score: analysis.innovation_score,
-      feasibility_score: analysis.feasibility_score,
-      market_score: analysis.market_score,
-      overall_score: analysis.overall_score,
-      feedback: JSON.stringify({ strengths: analysis.strengths, improvements: analysis.improvements, competing_apps: analysis.competing_apps }),
-      is_public: true,
-      tags: [],
+      market_size: analysis.market_value, unique_value: analysis.verdict,
+      innovation_score: analysis.innovation_score, feasibility_score: analysis.feasibility_score,
+      market_score: analysis.market_score, overall_score: analysis.overall_score,
+      feedback: JSON.stringify({ strengths: analysis.strengths, improvements: analysis.improvements, competing_apps: analysis.competing_apps, ethical_analysis: analysis.ethical_analysis, novelty_analysis: analysis.novelty_analysis, ethical_score: analysis.ethical_score, novelty_score: analysis.novelty_score }),
+      is_public: true, tags: [],
     });
-
-    if (error) {
-      toast.error("Failed to save. Try again.");
-    } else {
-      setSaved(true);
-      toast.success("Idea saved successfully! 🎉");
-    }
+    if (error) toast.error("Failed to save. Try again.");
+    else { setSaved(true); toast.success("Idea saved successfully! 🎉"); }
   };
 
-  const handleReset = () => {
-    setTitle("");
-    setProblemStatement("");
-    setProposedSolution("");
-    setAnalysis(null);
-    setSaved(false);
-  };
+  const handleReset = () => { setTitle(""); setProblemStatement(""); setProposedSolution(""); setAnalysis(null); setSaved(false); };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-3xl">
-          {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl md:text-4xl font-bold font-display mb-2">
               AI-Powered <span className="text-gradient-warm">Idea Analyzer</span>
             </h1>
             <p className="text-muted-foreground">
-              Just enter your problem & solution — our AI will analyze market value, competitors, target customers, and score your idea.
+              Enter your problem & solution — our AI analyzes market value, competitors, ethics, novelty, and scores your idea.
             </p>
           </div>
 
           {/* Input Form */}
           {!analysis && !isAnalyzing && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-card rounded-2xl border border-border p-6 md:p-8 space-y-5"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border p-6 md:p-8 space-y-5">
               <div className="flex items-center gap-2 mb-2">
                 <Lightbulb className="w-5 h-5 text-primary" />
                 <h2 className="font-display font-bold text-xl text-card-foreground">Tell Us Your Idea</h2>
               </div>
-
               <div>
                 <Label>Give your idea a title *</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g., AI-Powered Crop Disease Detector" className="mt-1.5 rounded-xl" />
               </div>
-
               <div>
                 <Label>What problem are you solving? *</Label>
-                <Textarea
-                  value={problemStatement}
-                  onChange={(e) => setProblemStatement(e.target.value)}
-                  placeholder="Describe the problem in detail. What pain point exists? Why does it matter? Who is affected?"
-                  className="mt-1.5 rounded-xl min-h-[120px]"
-                />
+                <Textarea value={problemStatement} onChange={(e) => setProblemStatement(e.target.value)} placeholder="Describe the problem in detail. What pain point exists?" className="mt-1.5 rounded-xl min-h-[120px]" />
                 <p className="text-xs text-muted-foreground mt-1">💡 Tip: Be specific about who faces this problem and why current solutions fail.</p>
               </div>
-
               <div>
                 <Label>What is your proposed solution? *</Label>
-                <Textarea
-                  value={proposedSolution}
-                  onChange={(e) => setProposedSolution(e.target.value)}
-                  placeholder="Describe your solution. What will it do? How will users benefit? How does it work?"
-                  className="mt-1.5 rounded-xl min-h-[120px]"
-                />
+                <Textarea value={proposedSolution} onChange={(e) => setProposedSolution(e.target.value)} placeholder="Describe your solution. What will it do? How will users benefit?" className="mt-1.5 rounded-xl min-h-[120px]" />
                 <p className="text-xs text-muted-foreground mt-1">💡 Tip: Focus on what makes your approach different and better.</p>
               </div>
-
               <Button variant="hero" size="lg" className="w-full" onClick={handleAnalyze} disabled={!canSubmit}>
-                <Sparkles className="w-5 h-5 mr-2" />
-                Analyze My Idea with AI
+                <Sparkles className="w-5 h-5 mr-2" /> Analyze My Idea with AI
               </Button>
-
               {!user && (
                 <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center">
                   ⚠️ Sign in to save your analysis. You can still analyze without signing in.
@@ -198,24 +182,15 @@ const ProblemStatementWizard = () => {
             </motion.div>
           )}
 
-          {/* Loading State */}
+          {/* Loading */}
           {isAnalyzing && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-card rounded-2xl border border-border p-12 text-center"
-            >
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card rounded-2xl border border-border p-12 text-center">
               <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
               <h2 className="font-display font-bold text-xl text-card-foreground mb-2">Analyzing Your Idea...</h2>
-              <p className="text-muted-foreground text-sm">Our AI is evaluating market potential, identifying competitors, and scoring your idea.</p>
-              <div className="flex justify-center gap-2 mt-6">
-                {["Market Research", "Competitor Analysis", "Scoring"].map((s, i) => (
-                  <motion.div
-                    key={s}
-                    initial={{ opacity: 0.3 }}
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.5 }}
-                  >
+              <p className="text-muted-foreground text-sm">Evaluating market potential, ethics, novelty, and competitors.</p>
+              <div className="flex justify-center gap-2 mt-6 flex-wrap">
+                {["Market Research", "Competitor Analysis", "Ethical Check", "Novelty Check", "Scoring"].map((s, i) => (
+                  <motion.div key={s} initial={{ opacity: 0.3 }} animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.4 }}>
                     <Badge variant="secondary" className="text-xs">{s}</Badge>
                   </motion.div>
                 ))}
@@ -223,25 +198,93 @@ const ProblemStatementWizard = () => {
             </motion.div>
           )}
 
-          {/* Analysis Results */}
+          {/* Results */}
           {analysis && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-6"
-            >
-              {/* Title & Verdict */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              {/* Scores */}
               <div className="bg-card rounded-2xl border border-border p-6 md:p-8">
                 <h2 className="font-display font-bold text-2xl text-card-foreground mb-1">{title}</h2>
                 <p className="text-muted-foreground text-sm mb-4">{analysis.verdict}</p>
-
-                {/* Scores */}
                 <div className="space-y-3">
                   <ScoreBar label="Innovation" score={analysis.innovation_score} color="bg-primary" />
                   <ScoreBar label="Feasibility" score={analysis.feasibility_score} color="bg-spark-teal" />
                   <ScoreBar label="Market" score={analysis.market_score} color="bg-spark-amber" />
+                  <ScoreBar label="Ethics" score={analysis.ethical_score} color="bg-emerald-500" />
+                  <ScoreBar label="Novelty" score={analysis.novelty_score} color="bg-violet-500" />
                   <div className="pt-2 border-t border-border">
                     <ScoreBar label="Overall" score={analysis.overall_score} color="bg-gradient-warm" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Ethical Analysis */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="w-5 h-5 text-emerald-500" />
+                  <h3 className="font-display font-bold text-lg text-card-foreground">Ethical Analysis</h3>
+                  <Badge variant="outline" className={riskColors[analysis.ethical_analysis.risk_level]}>
+                    {analysis.ethical_analysis.risk_level} Risk
+                  </Badge>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="p-3 bg-secondary/50 rounded-xl">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Fingerprint className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Privacy</p>
+                    </div>
+                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.privacy_concern}</p>
+                  </div>
+                  <div className="p-3 bg-secondary/50 rounded-xl">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Social Impact</p>
+                    </div>
+                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.social_impact}</p>
+                  </div>
+                  <div className="p-3 bg-secondary/50 rounded-xl">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Scale className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Fairness</p>
+                    </div>
+                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.fairness}</p>
+                  </div>
+                  <div className="p-3 bg-secondary/50 rounded-xl">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Leaf className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Environment</p>
+                    </div>
+                    <p className="text-sm text-card-foreground">{analysis.ethical_analysis.environmental_impact}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Novelty Analysis */}
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Gem className="w-5 h-5 text-violet-500" />
+                  <h3 className="font-display font-bold text-lg text-card-foreground">Novelty & Originality</h3>
+                  <Badge variant="outline" className={riskColors[analysis.novelty_analysis.patentability === "High" ? "Low" : analysis.novelty_analysis.patentability === "Low" ? "High" : "Medium"]}>
+                    {analysis.novelty_analysis.patentability} Patentability
+                  </Badge>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-secondary/50 rounded-xl">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Award className="w-4 h-4 text-violet-500" />
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Uniqueness</p>
+                    </div>
+                    <p className="text-sm text-card-foreground">{analysis.novelty_analysis.uniqueness}</p>
+                  </div>
+                  <div className="p-3 bg-secondary/50 rounded-xl">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <FileSearch className="w-4 h-4 text-muted-foreground" />
+                      <p className="text-xs font-bold text-muted-foreground uppercase">Prior Art</p>
+                    </div>
+                    <p className="text-sm text-card-foreground">{analysis.novelty_analysis.prior_art}</p>
+                  </div>
+                  <div className="p-3 bg-violet-500/10 rounded-xl">
+                    <p className="text-xs font-bold text-muted-foreground uppercase mb-1">Key Differentiator</p>
+                    <p className="text-sm font-medium text-card-foreground">{analysis.novelty_analysis.differentiator}</p>
                   </div>
                 </div>
               </div>
@@ -339,7 +382,7 @@ const ProblemStatementWizard = () => {
                 <h3 className="font-display font-bold text-lg text-card-foreground mb-4">🧭 What to Do Next</h3>
                 <div className="space-y-3">
                   {[
-                    { step: "1", title: "Validate Your Problem", desc: "Talk to at least 20 potential users to confirm the problem exists", route: "/mentors", cta: "Find a Mentor" },
+                    { step: "1", title: "Validate Your Problem", desc: "Talk to at least 20 potential users", route: "/mentors", cta: "Find a Mentor" },
                     { step: "2", title: "Join a Hackathon", desc: "Build a prototype in a competitive environment", route: "/hackathons", cta: "Browse Hackathons" },
                     { step: "3", title: "Take Relevant Courses", desc: "Upskill in areas that strengthen your solution", route: "/courses", cta: "Explore Courses" },
                     { step: "4", title: "Protect Your IP", desc: "If your solution is novel, consider filing a patent", route: "/patents", cta: "Register Patent" },
@@ -361,25 +404,21 @@ const ProblemStatementWizard = () => {
                 </div>
               </div>
 
-              {/* Action buttons */}
+              {/* Actions */}
               <div className="flex gap-3">
                 {!saved ? (
                   <>
                     <Button variant="hero" className="flex-1" onClick={handleSave}>
                       <CheckCircle2 className="w-4 h-4 mr-1" /> Save to My Ideas
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={handleReset}>
-                      Analyze Another Idea
-                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={handleReset}>Analyze Another Idea</Button>
                   </>
                 ) : (
                   <>
                     <Button variant="hero" className="flex-1" onClick={() => navigate("/ideas")}>
                       View My Ideas <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={handleReset}>
-                      Analyze Another
-                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={handleReset}>Analyze Another</Button>
                   </>
                 )}
               </div>

@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 const demoSteps = [
   {
     icon: Sparkles,
-    title: "Welcome to Spark Guidance",
+    title: "Welcome to Innvo Spark Guidance",
     description: "Your all-in-one innovation platform to transform ideas into reality. Let us walk you through how it works!",
     image: "🚀",
     color: "bg-primary/10 text-primary",
@@ -98,7 +98,7 @@ const demoSteps = [
   {
     icon: Sparkles,
     title: "You're All Set! 🎉",
-    description: "That's the complete Spark Guidance journey! Start by submitting your problem statement, and we'll guide you step by step from idea to funded startup.",
+    description: "That's the complete Innvo Spark Guidance journey! Start by submitting your problem statement, and we'll guide you step by step from idea to funded startup.",
     image: "✨",
     color: "bg-gradient-warm text-primary-foreground",
     action: { label: "Get Started Now", route: "/auth" },
