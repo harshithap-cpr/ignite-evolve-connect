@@ -98,7 +98,6 @@ const ProblemStatementWizard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [saved, setSaved] = useState(false);
-  const [showUpgrade, setShowUpgrade] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isPaid, plan, loading: subLoading } = useSubscription();
