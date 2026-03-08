@@ -236,7 +236,7 @@ const ProblemStatementWizard = () => {
                       Free Analysis Limit Reached
                     </h3>
                     <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                      You've used your 2 free analyses. Subscribe to continue analyzing ideas and unlock detailed reports.
+                      You've used your free analysis. Subscribe to continue analyzing ideas and unlock full detailed reports.
                     </p>
                   </div>
 
