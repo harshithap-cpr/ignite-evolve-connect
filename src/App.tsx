@@ -23,6 +23,7 @@ import TeamsPage from "./pages/TeamsPage";
 import TermsPage from "./pages/TermsPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
 import PaymentVerificationPage from "./pages/PaymentVerificationPage";
+import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import NotFound from "./pages/NotFound";
 import AppFeedback from "./components/AppFeedback";
 
