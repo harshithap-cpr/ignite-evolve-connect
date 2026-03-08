@@ -207,18 +207,15 @@ const PricingSection = () => {
             </div>
 
             {/* Pay Now deep link */}
-            <a
-              href={upiPaymentLink}
-              className="w-full"
-            >
+            <a href={upiPaymentLink} className="w-full">
               <Button variant="hero" className="w-full">
                 <IndianRupee className="w-4 h-4 mr-1" />
-                Pay {selectedPlan?.price} via UPI App
+                Pay {selectedPlan?.price} via GPay / PhonePe / Paytm
               </Button>
             </a>
 
             <p className="text-xs text-muted-foreground text-center">
-              After payment, please share the transaction ID with us for activation. Supports Google Pay, PhonePe, Paytm & all UPI apps.
+              Opens your installed UPI payment app directly. No WhatsApp needed. Supports all UPI apps.
             </p>
           </div>
         </DialogContent>
