@@ -62,6 +62,7 @@ const IdeasPage = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
+  const [detailIdea, setDetailIdea] = useState<Idea | null>(null);
   const [tab, setTab] = useState<"my" | "leaderboard">("my");
   const [formData, setFormData] = useState({
     title: "", problem_statement: "", proposed_solution: "", target_audience: "",
