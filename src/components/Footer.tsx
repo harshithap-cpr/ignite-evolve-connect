@@ -10,10 +10,10 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 font-display font-bold text-xl mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-warm flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden">
+                <img src={logo} alt="Innvo Spark Guidance" className="w-full h-full object-contain" />
               </div>
-              <span className="text-background">Spark Guidance</span>
+              <span className="text-background">Innvo Spark Guidance</span>
             </div>
             <p className="text-background/60 text-sm leading-relaxed max-w-sm mb-6">
               Empowering the next generation of innovators with mentorship, competitions, hackathons, and courses — all in one platform.
