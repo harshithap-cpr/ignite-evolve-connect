@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Crown, Lock, Check, Copy, CheckCircle, QrCode, IndianRupee } from "lucide-react";
+import { Crown, Lock, Check, Copy, CheckCircle, QrCode, IndianRupee, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const UPI_ID = "hp123cpr@oksbi";
 
@@ -54,6 +57,9 @@ const PaywallBanner = ({ feature, remainingFree, canUse, isPaid, defaultShowPlan
   const [showPlans, setShowPlans] = useState(defaultShowPlans);
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [copied, setCopied] = useState(false);
+  const [txnId, setTxnId] = useState("");
+  const [txnSubmitting, setTxnSubmitting] = useState(false);
+  const { user } = useAuth();
 
   if (isPaid) return null;
 
@@ -62,6 +68,25 @@ const PaywallBanner = ({ feature, remainingFree, canUse, isPaid, defaultShowPlan
     setCopied(true);
     toast.success("UPI ID copied!");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleTxnSubmit = async () => {
+    if (!user) { toast.error("Please sign in first"); return; }
+    if (!txnId.trim()) { toast.error("Please enter transaction ID"); return; }
+    setTxnSubmitting(true);
+    const { error } = await supabase.from("subscriptions").insert({
+      user_id: user.id,
+      plan: selectedPlan?.name.toLowerCase() || "pro",
+      status: "pending",
+      transaction_id: txnId.trim(),
+      amount: selectedPlan?.amount || 99,
+    });
+    setTxnSubmitting(false);
+    if (error) { toast.error("Failed to submit"); return; }
+    toast.success("Payment submitted! We'll verify & activate within 24 hours.");
+    setSelectedPlan(null);
+    setShowPlans(false);
+    setTxnId("");
   };
 
   const upiPaymentLink = selectedPlan
@@ -170,9 +195,26 @@ const PaywallBanner = ({ feature, remainingFree, canUse, isPaid, defaultShowPlan
                 <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan?.price} via UPI App
               </Button>
             </a>
-            <p className="text-xs text-muted-foreground text-center">
-              After payment, share the transaction ID with us for activation. Supports Google Pay, PhonePe, Paytm & all UPI apps.
-            </p>
+            <div className="w-full border-t border-border pt-4 space-y-3">
+              <p className="text-sm font-semibold text-card-foreground text-center">After payment, submit your transaction ID:</p>
+              <Input
+                placeholder="Enter UPI Transaction ID"
+                value={txnId}
+                onChange={(e) => setTxnId(e.target.value)}
+              />
+              <Button
+                variant="hero"
+                className="w-full"
+                disabled={!txnId.trim() || txnSubmitting}
+                onClick={handleTxnSubmit}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {txnSubmitting ? "Submitting..." : "Submit for Verification"}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                Or <a href="/payment-verification" className="text-primary underline">upload screenshot</a> for faster verification.
+              </p>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

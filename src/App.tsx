@@ -22,6 +22,8 @@ import ProcurementPage from "./pages/ProcurementPage";
 import TeamsPage from "./pages/TeamsPage";
 import TermsPage from "./pages/TermsPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
+import PaymentVerificationPage from "./pages/PaymentVerificationPage";
+import AdminPaymentsPage from "./pages/AdminPaymentsPage";
 import NotFound from "./pages/NotFound";
 import AppFeedback from "./components/AppFeedback";
 
@@ -53,6 +55,8 @@ const App = () => (
             <Route path="/teams" element={<TeamsPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
+            <Route path="/payment-verification" element={<PaymentVerificationPage />} />
+            <Route path="/admin/payments" element={<AdminPaymentsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AppFeedback />
