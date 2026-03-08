@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, Users, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-illustration.jpg";
 import DemoWalkthrough from "@/components/DemoWalkthrough";
+import { supabase } from "@/integrations/supabase/client";
 
 const HeroSection = () => {
   const [demoOpen, setDemoOpen] = useState(false);
