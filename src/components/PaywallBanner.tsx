@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Crown, Lock, Check, Copy, CheckCircle, QrCode, IndianRupee } from "lucide-react";
+import { Crown, Lock, Check, Copy, CheckCircle, QrCode, IndianRupee, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
