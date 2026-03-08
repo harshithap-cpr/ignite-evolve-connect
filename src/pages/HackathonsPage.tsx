@@ -68,12 +68,15 @@ const HackathonsPage = () => {
     checkIdeas();
   }, [user]);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("hackathon_registration");
+
   const handleRegister = async (hackathonId: string) => {
     if (!user) {
       toast.error("Please sign in to register");
       navigate("/auth");
       return;
     }
+    if (!canUse) { toast.error("Free registration limit reached. Please upgrade."); return; }
     if (!hasIdeas) {
       toast.error("Please submit and save an idea first before registering for hackathons");
       navigate("/submit-idea");
@@ -86,6 +89,7 @@ const HackathonsPage = () => {
       if (error.code === "23505") toast.info("You're already registered!");
       else toast.error("Registration failed");
     } else {
+      await recordUsage();
       toast.success("Successfully registered! 🎉");
     }
   };

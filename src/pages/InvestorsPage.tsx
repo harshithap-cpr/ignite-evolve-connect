@@ -72,12 +72,15 @@ const InvestorsPage = () => {
     fetchInvestors();
   }, []);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("investor_connection");
+
   const handleConnect = async () => {
     if (!user) {
       toast.error("Please sign in to connect");
       navigate("/auth");
       return;
     }
+    if (!canUse) { toast.error("Free connection limit reached. Please upgrade."); return; }
     if (!selectedInvestor) return;
 
     const { error } = await supabase.from("investor_connections").insert({
@@ -90,6 +93,7 @@ const InvestorsPage = () => {
       if (error.code === "23505") toast.info("You've already requested a connection!");
       else toast.error("Connection request failed");
     } else {
+      await recordUsage();
       toast.success(`Connection request sent to ${selectedInvestor.name}! 🤝`);
       setSelectedInvestor(null);
       setConnectMessage("");

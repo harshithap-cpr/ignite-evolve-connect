@@ -73,8 +73,11 @@ const MentorsPage = () => {
     fetchMentors();
   }, []);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("mentor_booking");
+
   const handleBooking = async () => {
     if (!user) { toast.error("Please sign in to book"); navigate("/auth"); return; }
+    if (!canUse) { toast.error("Free booking limit reached. Please upgrade."); return; }
     if (!selectedMentor || !bookingDate) return;
     const { error } = await supabase.from("mentor_bookings").insert({
       mentor_id: selectedMentor.id, user_id: user.id,
@@ -83,6 +86,7 @@ const MentorsPage = () => {
     });
     if (error) toast.error("Booking failed. Try again.");
     else {
+      await recordUsage();
       toast.success(`Session booked with ${selectedMentor.name}! 🎉`);
       setSelectedMentor(null); setBookingDate(""); setBookingNotes(""); setUserDomain("");
     }

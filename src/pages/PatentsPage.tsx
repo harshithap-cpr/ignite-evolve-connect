@@ -99,6 +99,8 @@ const PatentsPage = () => {
     fetchPatents();
   }, [user]);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("patent_filing");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -106,6 +108,7 @@ const PatentsPage = () => {
       navigate("/auth");
       return;
     }
+    if (!canUse) { toast.error("Free patent filing limit reached. Please upgrade."); return; }
 
     const { error } = await supabase.from("patents").insert({
       user_id: user.id,

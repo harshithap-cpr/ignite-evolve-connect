@@ -95,9 +95,12 @@ const CopyrightsPage = () => {
     fetchCopyrights();
   }, [user]);
 
+  const { canUse, remainingFree, isPaid, recordUsage } = useUsageGate("copyright_filing");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) { toast.error("Please sign in first"); navigate("/auth"); return; }
+    if (!canUse) { toast.error("Free copyright filing limit reached. Please upgrade."); return; }
 
     const { error } = await supabase.from("copyrights" as any).insert({
       user_id: user.id,
