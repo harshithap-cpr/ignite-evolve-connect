@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const FREE_LIMIT = 2;
+
 async function authenticateUser(req: Request) {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) return null;
@@ -21,6 +23,31 @@ async function authenticateUser(req: Request) {
   if (error || !data?.claims) return null;
 
   return { userId: data.claims.sub as string, supabase };
+}
+
+async function checkUsageGate(supabase: any, userId: string, feature: string) {
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("plan")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (sub?.plan === "pro" || sub?.plan === "premium") return true;
+
+  const { count } = await supabase
+    .from("usage_tracking")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("feature", feature);
+
+  return (count || 0) < FREE_LIMIT;
+}
+
+async function recordUsage(supabase: any, userId: string, feature: string) {
+  await supabase.from("usage_tracking").insert({ user_id: userId, feature });
 }
 
 serve(async (req) => {
@@ -39,6 +66,13 @@ serve(async (req) => {
     if (!title || !problem_statement || !proposed_solution) {
       return new Response(JSON.stringify({ error: "Title, problem statement, and solution are required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const canUse = await checkUsageGate(auth.supabase, auth.userId, "pitch_deck_generation");
+    if (!canUse) {
+      return new Response(JSON.stringify({ error: "Free usage limit reached. Please upgrade to continue." }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -144,6 +178,8 @@ ANALYSIS DATA:
     }
 
     const pitchDeck = JSON.parse(toolCall.function.arguments);
+
+    await recordUsage(auth.supabase, auth.userId, "pitch_deck_generation");
 
     return new Response(JSON.stringify(pitchDeck), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
