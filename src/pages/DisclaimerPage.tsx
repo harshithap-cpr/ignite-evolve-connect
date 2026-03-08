@@ -18,7 +18,7 @@ const DisclaimerPage = () => {
           <div className="prose prose-sm max-w-none text-muted-foreground space-y-6">
             <div className="bg-spark-amber/10 border border-spark-amber/20 rounded-2xl p-6">
               <h2 className="text-lg font-bold font-display text-card-foreground mt-0">Important Notice</h2>
-              <p className="mb-0">The information provided on Innvo Spark Guidance is for general informational and educational purposes only. It is not intended as, and should not be construed as, professional advice of any kind.</p>
+              <p className="mb-0">The information provided on Innovo Spark Guidance is for general informational and educational purposes only. It is not intended as, and should not be construed as, professional advice of any kind.</p>
             </div>
 
             <section>
@@ -43,7 +43,7 @@ const DisclaimerPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">Third-Party Content</h2>
-              <p>Mentor advice, course content, and investor information are provided by third parties. Innvo Spark Guidance does not endorse or verify the accuracy of third-party content.</p>
+              <p>Mentor advice, course content, and investor information are provided by third parties. Innovo Spark Guidance does not endorse or verify the accuracy of third-party content.</p>
             </section>
 
             <p className="text-xs text-muted-foreground pt-4 border-t border-border">Last updated: March 8, 2026</p>

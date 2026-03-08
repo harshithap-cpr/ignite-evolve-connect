@@ -67,7 +67,7 @@ const FeaturesSection = () => {
             <span className="text-gradient-warm">Innovate</span>
           </h2>
           <p className="text-muted-foreground text-lg">
-            From mentorship to hackathons, courses to competitions — Innvo Spark Guidance brings your entire innovation toolkit together.
+            From mentorship to hackathons, courses to competitions — Innovo Spark Guidance brings your entire innovation toolkit together.
           </p>
         </div>
 
