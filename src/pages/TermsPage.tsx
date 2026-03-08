@@ -49,7 +49,7 @@ const TermsPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">8. Investor Connections</h2>
-              <p>Investor contact information and connections are provided as-is. Spark Guidance does not guarantee funding outcomes. All investment decisions are between users and investors independently.</p>
+              <p>Investor contact information and connections are provided as-is. Innvo Spark Guidance does not guarantee funding outcomes. All investment decisions are between users and investors independently.</p>
             </section>
 
             <section>
