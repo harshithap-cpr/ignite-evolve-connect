@@ -26,7 +26,7 @@ const CTASection = () => {
               size="lg"
               className="bg-primary-foreground text-primary border-primary-foreground hover:bg-primary-foreground/90 hover:text-primary rounded-full font-semibold text-base px-8"
             >
-              Join Innvo Spark Guidance — It's Free
+              Join Innovo Spark Guidance — It's Free
             </Button>
           </div>
         </motion.div>

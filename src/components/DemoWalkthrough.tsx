@@ -98,7 +98,7 @@ const demoSteps = [
   {
     icon: Sparkles,
     title: "You're All Set! 🎉",
-    description: "That's the complete Innvo Spark Guidance journey! Start by submitting your problem statement, and we'll guide you step by step from idea to funded startup.",
+    description: "That's the complete Innovo Spark Guidance journey! Start by submitting your problem statement, and we'll guide you step by step from idea to funded startup.",
     image: "✨",
     color: "bg-gradient-warm text-primary-foreground",
     action: { label: "Get Started Now", route: "/auth" },
