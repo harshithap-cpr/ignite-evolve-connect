@@ -24,7 +24,7 @@ const TermsPage = () => {
 
             <section>
               <h2 className="text-lg font-bold font-display text-card-foreground">3. Intellectual Property</h2>
-              <p>All ideas, problem statements, and solutions submitted remain the intellectual property of the user who submitted them. Innvo Spark Guidance does not claim ownership of user-submitted content. By making an idea public, you grant other users viewing rights only — not the right to copy or commercialize your idea.</p>
+              <p>All ideas, problem statements, and solutions submitted remain the intellectual property of the user who submitted them. Innovo Spark Guidance does not claim ownership of user-submitted content. By making an idea public, you grant other users viewing rights only — not the right to copy or commercialize your idea.</p>
             </section>
 
             <section>
