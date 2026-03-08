@@ -383,14 +383,27 @@ const ProblemStatementWizard = () => {
                   <h2 className="font-display font-bold text-2xl text-card-foreground">{title}</h2>
                   {!isPaid && (
                     <Badge variant="secondary" className="text-xs">
-                      Basic Report
+                      Basic Report — Upgrade for Full Analysis
+                    </Badge>
+                  )}
+                  {isPaid && (
+                    <Badge className="text-xs bg-primary text-primary-foreground">
+                      Full Report
                     </Badge>
                   )}
                 </div>
                 <p className="text-muted-foreground text-sm mb-4">{analysis.verdict}</p>
                 <div className="space-y-3">
                   <ScoreBar label="Overall" score={analysis.overall_score} color="bg-gradient-warm" />
+                  <ScoreBar label="Innovation" score={analysis.innovation_score} color="bg-primary" />
+                  <ScoreBar label="Feasibility" score={analysis.feasibility_score} color="bg-spark-teal" />
                 </div>
+                {!isPaid && (
+                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Market score, ethics, novelty, competitors & more available in full report</span>
+                  </div>
+                )}
               </div>
 
 
