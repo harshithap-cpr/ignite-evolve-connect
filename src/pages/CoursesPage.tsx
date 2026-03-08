@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, Clock, BookOpen, Search, Lock } from "lucide-react";
+import { Star, Clock, BookOpen, Search, Lock, Play } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ interface Course {
   is_premium: boolean;
   avg_rating: number;
   total_ratings: number;
+  video_url: string | null;
 }
 
 const diffColors: Record<string, string> = {
@@ -46,6 +47,7 @@ const CoursesPage = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [ratingCourse, setRatingCourse] = useState<Course | null>(null);
+  const [videoCourse, setVideoCourse] = useState<Course | null>(null);
   const [userRating, setUserRating] = useState(0);
   const [userReview, setUserReview] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
@@ -171,7 +173,7 @@ const CoursesPage = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="hero" size="sm" className="flex-1">
+                      <Button variant="hero" size="sm" className="flex-1" onClick={() => setVideoCourse(course)}>
                         {course.is_premium ? "Unlock" : "Start Learning"}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => { setRatingCourse(course); setUserRating(0); setUserReview(""); }}>
@@ -219,6 +221,39 @@ const CoursesPage = () => {
             <Button variant="hero" className="w-full" onClick={handleRate} disabled={userRating === 0}>
               Submit Rating
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Video Player Dialog */}
+      <Dialog open={!!videoCourse} onOpenChange={() => setVideoCourse(null)}>
+        <DialogContent className="rounded-2xl max-w-3xl p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Play className="w-5 h-5 text-primary" />
+              {videoCourse?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-4 pb-4">
+            {videoCourse?.video_url ? (
+              <div className="aspect-video rounded-xl overflow-hidden bg-muted">
+                <iframe
+                  src={videoCourse.video_url}
+                  title={videoCourse.title}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="aspect-video rounded-xl bg-muted flex items-center justify-center">
+                <p className="text-muted-foreground text-sm">Video coming soon!</p>
+              </div>
+            )}
+            <div className="mt-3">
+              <p className="text-sm text-muted-foreground">by {videoCourse?.instructor}</p>
+              <p className="text-sm text-card-foreground mt-1">{videoCourse?.description}</p>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

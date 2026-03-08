@@ -91,6 +91,7 @@ export type Database = {
           lessons_count: number | null
           title: string
           total_ratings: number | null
+          video_url: string | null
         }
         Insert: {
           avg_rating?: number | null
@@ -106,6 +107,7 @@ export type Database = {
           lessons_count?: number | null
           title: string
           total_ratings?: number | null
+          video_url?: string | null
         }
         Update: {
           avg_rating?: number | null
@@ -121,6 +123,7 @@ export type Database = {
           lessons_count?: number | null
           title?: string
           total_ratings?: number | null
+          video_url?: string | null
         }
         Relationships: []
       }
