@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/use-subscription";
 
-const FREE_LIMIT = 2;
+const FREE_LIMIT = 1;
 
 export const useUsageGate = (feature: string) => {
   const { user } = useAuth();

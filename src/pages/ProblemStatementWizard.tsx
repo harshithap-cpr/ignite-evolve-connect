@@ -113,7 +113,7 @@ const ProblemStatementWizard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { isPaid, plan, loading: subLoading } = useSubscription();
-  const { canUse: canAnalyze, remainingFree, recordUsage } = useUsageGate("ai_analysis");
+  const { canUse: canAnalyze, remainingFree } = useUsageGate("ai_analysis");
 
   const canSubmit = title.length > 0 && problemStatement.length > 10 && proposedSolution.length > 10;
 
@@ -221,7 +221,7 @@ const ProblemStatementWizard = () => {
                   </Button>
                   {!isPaid && remainingFree > 0 && (
                     <div className="p-3 bg-spark-amber/10 rounded-xl text-sm text-spark-amber text-center border border-spark-amber/20">
-                      ⚠️ You have <strong>{remainingFree} free analysis</strong> remaining. Subscribe for unlimited access.
+                      ⚠️ You have <strong>{remainingFree} free analysis</strong> remaining. Subscribe for unlimited access & full reports.
                     </div>
                   )}
                 </>
@@ -236,7 +236,7 @@ const ProblemStatementWizard = () => {
                       Free Analysis Limit Reached
                     </h3>
                     <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                      You've used your 2 free analyses. Subscribe to continue analyzing ideas and unlock detailed reports.
+                      You've used your free analysis. Subscribe to continue analyzing ideas and unlock full detailed reports.
                     </p>
                   </div>
 
@@ -383,17 +383,62 @@ const ProblemStatementWizard = () => {
                   <h2 className="font-display font-bold text-2xl text-card-foreground">{title}</h2>
                   {!isPaid && (
                     <Badge variant="secondary" className="text-xs">
-                      Basic Report
+                      Basic Report — Upgrade for Full Analysis
+                    </Badge>
+                  )}
+                  {isPaid && (
+                    <Badge className="text-xs bg-primary text-primary-foreground">
+                      Full Report
                     </Badge>
                   )}
                 </div>
                 <p className="text-muted-foreground text-sm mb-4">{analysis.verdict}</p>
                 <div className="space-y-3">
                   <ScoreBar label="Overall" score={analysis.overall_score} color="bg-gradient-warm" />
+                  <ScoreBar label="Innovation" score={analysis.innovation_score} color="bg-primary" />
+                  <ScoreBar label="Feasibility" score={analysis.feasibility_score} color="bg-spark-teal" />
                 </div>
+                {!isPaid && (
+                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Market score, ethics, novelty, competitors & more available in full report</span>
+                  </div>
+                )}
               </div>
 
-
+              {/* Upgrade CTA for free users */}
+              {!isPaid && (
+                <div className="bg-gradient-to-br from-primary/10 via-card to-spark-amber/10 rounded-2xl border border-primary/20 p-6 md:p-8 text-center space-y-4">
+                  <div className="flex justify-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Lock className="w-6 h-6 text-primary" />
+                    </div>
+                  </div>
+                  <h3 className="font-display font-bold text-xl text-card-foreground">Unlock Full Analysis</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Get detailed market scores, ethical & novelty analysis, competitor breakdown, target customers, strengths, improvements, and actionable next steps.
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
+                    {["Market Scores", "Ethics Report", "Novelty Check", "Competitor Map", "Target Customers", "Pitch Deck"].map((f) => (
+                      <span key={f} className="flex items-center gap-1 bg-secondary/50 px-2 py-1 rounded-full">
+                        <Lock className="w-3 h-3" /> {f}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex justify-center gap-3">
+                    {upgradePlans.map((p) => (
+                      <Button
+                        key={p.name}
+                        variant={p.name === "Pro" ? "hero" : "outline"}
+                        onClick={() => setSelectedPlan(p)}
+                        className="min-w-[140px]"
+                      >
+                        <Crown className="w-4 h-4 mr-1" /> {p.name} {p.price}{p.period}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Detailed sections - only for paid users */}
               {isPaid && (
