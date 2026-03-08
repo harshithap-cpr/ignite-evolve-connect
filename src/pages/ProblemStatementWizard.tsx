@@ -298,9 +298,12 @@ const ProblemStatementWizard = () => {
                           </div>
                           <a href={upiPaymentLink} className="block w-full">
                             <Button variant="hero" className="w-full">
-                              <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan.price} via UPI App
+                              <IndianRupee className="w-4 h-4 mr-1" /> Pay {selectedPlan.price} via GPay / PhonePe / Paytm
                             </Button>
                           </a>
+                          <p className="text-xs text-muted-foreground text-center">
+                            Opens your installed UPI payment app directly. No WhatsApp needed.
+                          </p>
                           <div className="border-t border-border pt-4 space-y-3">
                             <p className="text-sm font-semibold text-card-foreground">After payment, enter your transaction ID:</p>
                             <Input placeholder="Enter UPI Transaction ID" value={txnId} onChange={(e) => setTxnId(e.target.value)} />
