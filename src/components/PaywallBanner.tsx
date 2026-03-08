@@ -57,8 +57,9 @@ const PaywallBanner = ({ feature, remainingFree, canUse, isPaid, defaultShowPlan
   const [showPlans, setShowPlans] = useState(defaultShowPlans);
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [copied, setCopied] = useState(false);
-
-  if (isPaid) return null;
+  const [txnId, setTxnId] = useState("");
+  const [txnSubmitting, setTxnSubmitting] = useState(false);
+  const { user } = useAuth();
 
   const copyUpiId = async () => {
     await navigator.clipboard.writeText(UPI_ID);
