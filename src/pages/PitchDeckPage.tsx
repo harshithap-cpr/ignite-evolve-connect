@@ -127,6 +127,81 @@ const PitchDeckPage = () => {
     );
   };
 
+  const exportToPDF = useCallback(() => {
+    if (!editedSlides.length) return;
+    const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const w = pdf.internal.pageSize.getWidth();
+    const h = pdf.internal.pageSize.getHeight();
+    const margin = 60;
+    const contentW = w - margin * 2;
+
+    editedSlides.forEach((slide, idx) => {
+      if (idx > 0) pdf.addPage();
+
+      // Background
+      pdf.setFillColor(245, 245, 250);
+      pdf.rect(0, 0, w, h, "F");
+
+      // Slide number badge
+      pdf.setFontSize(10);
+      pdf.setTextColor(120, 120, 140);
+      pdf.text(`Slide ${slide.slide_number} — ${slide.slide_type.toUpperCase()}`, margin, 40);
+
+      // Title
+      pdf.setFontSize(28);
+      pdf.setTextColor(30, 30, 40);
+      pdf.text(slide.title, margin, 80, { maxWidth: contentW });
+
+      // Subtitle
+      let y = 110;
+      if (slide.subtitle) {
+        pdf.setFontSize(14);
+        pdf.setTextColor(100, 100, 120);
+        const subtitleLines = pdf.splitTextToSize(slide.subtitle, contentW);
+        pdf.text(subtitleLines, margin, y);
+        y += subtitleLines.length * 18 + 10;
+      }
+
+      // Bullets
+      pdf.setFontSize(13);
+      pdf.setTextColor(50, 50, 65);
+      slide.bullets.forEach((bullet) => {
+        const lines = pdf.splitTextToSize(`•  ${bullet}`, contentW - 20);
+        if (y + lines.length * 16 > h - 80) return; // prevent overflow
+        pdf.text(lines, margin + 10, y);
+        y += lines.length * 16 + 8;
+      });
+
+      // Speaker notes at bottom
+      if (slide.speaker_notes) {
+        const notesY = h - 60;
+        pdf.setDrawColor(200, 200, 210);
+        pdf.line(margin, notesY - 15, w - margin, notesY - 15);
+        pdf.setFontSize(9);
+        pdf.setTextColor(140, 140, 155);
+        const noteLines = pdf.splitTextToSize(`Notes: ${slide.speaker_notes}`, contentW);
+        pdf.text(noteLines.slice(0, 2), margin, notesY);
+      }
+    });
+
+    // Elevator pitch as last page
+    if (editedPitch) {
+      pdf.addPage();
+      pdf.setFillColor(245, 245, 250);
+      pdf.rect(0, 0, w, h, "F");
+      pdf.setFontSize(24);
+      pdf.setTextColor(30, 30, 40);
+      pdf.text("1-Minute Elevator Pitch", margin, 70);
+      pdf.setFontSize(13);
+      pdf.setTextColor(50, 50, 65);
+      const pitchLines = pdf.splitTextToSize(editedPitch, contentW);
+      pdf.text(pitchLines, margin, 110);
+    }
+
+    pdf.save(`${ideaData?.title || "pitch-deck"}.pdf`);
+    toast.success("PDF downloaded!");
+  }, [editedSlides, editedPitch, ideaData]);
+
   const speakText = useCallback((text: string) => {
     if (isSpeaking) {
       window.speechSynthesis.cancel();
