@@ -37,6 +37,7 @@ const HackathonsPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [hasIdeas, setHasIdeas] = useState<boolean | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -53,10 +54,27 @@ const HackathonsPage = () => {
     fetchHackathons();
   }, []);
 
+  useEffect(() => {
+    if (!user) { setHasIdeas(null); return; }
+    const checkIdeas = async () => {
+      const { count } = await supabase
+        .from("ideas")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      setHasIdeas((count ?? 0) > 0);
+    };
+    checkIdeas();
+  }, [user]);
+
   const handleRegister = async (hackathonId: string) => {
     if (!user) {
       toast.error("Please sign in to register");
       navigate("/auth");
+      return;
+    }
+    if (!hasIdeas) {
+      toast.error("Please submit and save an idea first before registering for hackathons");
+      navigate("/submit-idea");
       return;
     }
     const { error } = await supabase
