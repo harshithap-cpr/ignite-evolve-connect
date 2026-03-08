@@ -173,7 +173,7 @@ const CoursesPage = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="hero" size="sm" className="flex-1">
+                      <Button variant="hero" size="sm" className="flex-1" onClick={() => setVideoCourse(course)}>
                         {course.is_premium ? "Unlock" : "Start Learning"}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => { setRatingCourse(course); setUserRating(0); setUserReview(""); }}>
