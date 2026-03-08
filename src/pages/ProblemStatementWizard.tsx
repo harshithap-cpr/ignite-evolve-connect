@@ -106,6 +106,8 @@ const ProblemStatementWizard = () => {
   const [saved, setSaved] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: string; amount: number; period: string; description: string; features: string[] } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [txnId, setTxnId] = useState("");
+  const [txnSubmitting, setTxnSubmitting] = useState(false);
 
   const UPI_ID = "hp123cpr@oksbi";
   const upgradePlans = [

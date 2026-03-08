@@ -22,6 +22,7 @@ import ProcurementPage from "./pages/ProcurementPage";
 import TeamsPage from "./pages/TeamsPage";
 import TermsPage from "./pages/TermsPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
+import PaymentVerificationPage from "./pages/PaymentVerificationPage";
 import NotFound from "./pages/NotFound";
 import AppFeedback from "./components/AppFeedback";
 
