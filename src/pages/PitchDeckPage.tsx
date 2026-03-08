@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import {
   Loader2, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX,
   Edit3, Save, Presentation, ArrowLeft, Lightbulb, Mic, FileText,
-  Target, TrendingUp, Users, Rocket, HandCoins, Sparkles, Download,
+  Target, TrendingUp, Users, Rocket, HandCoins, Sparkles, Download, Copy, ClipboardCheck,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
