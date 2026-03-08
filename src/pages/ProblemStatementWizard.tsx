@@ -265,14 +265,15 @@ const ProblemStatementWizard = () => {
                 </div>
               </div>
 
-              {/* Upgrade CTA for free users */}
+              {/* Inline Upgrade + Payment — all in one place for free users */}
               {!isPaid && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-card rounded-2xl border-2 border-primary/30 p-8 text-center space-y-4"
+                  className="bg-card rounded-2xl border-2 border-primary/30 p-6 md:p-8 space-y-5"
                 >
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  <div className="text-center space-y-3">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                     <Crown className="w-8 h-8 text-primary" />
                   </div>
                   <h3 className="font-display font-bold text-xl text-card-foreground">
