@@ -48,6 +48,10 @@ const MentorDashboard = () => {
     fetchData();
   }, [user]);
 
+  // Realtime subscriptions
+  useRealtime({ table: "ideas", onInsert: () => fetchData(), onUpdate: () => fetchData() });
+  useRealtime({ table: "mentor_bookings", onInsert: () => fetchData(), onUpdate: () => fetchData() });
+
   const fetchData = async () => {
     setLoading(true);
     const [ideasRes, mentorRes] = await Promise.all([
