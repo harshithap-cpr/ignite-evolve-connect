@@ -47,6 +47,9 @@ const InvestorDashboard = () => {
     fetchData();
   }, [user]);
 
+  useRealtime({ table: "ideas", onInsert: () => fetchData(), onUpdate: () => fetchData() });
+  useRealtime({ table: "investor_connections", onInsert: () => fetchData(), onUpdate: () => fetchData() });
+
   const fetchData = async () => {
     setLoading(true);
     const [ideasRes, investorRes] = await Promise.all([
