@@ -47,10 +47,11 @@ interface PaywallBannerProps {
   remainingFree: number;
   canUse: boolean;
   isPaid: boolean;
+  defaultShowPlans?: boolean;
 }
 
-const PaywallBanner = ({ feature, remainingFree, canUse, isPaid }: PaywallBannerProps) => {
-  const [showPlans, setShowPlans] = useState(false);
+const PaywallBanner = ({ feature, remainingFree, canUse, isPaid, defaultShowPlans = false }: PaywallBannerProps) => {
+  const [showPlans, setShowPlans] = useState(defaultShowPlans);
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [copied, setCopied] = useState(false);
 
