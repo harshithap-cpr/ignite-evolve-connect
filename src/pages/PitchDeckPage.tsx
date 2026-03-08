@@ -62,6 +62,14 @@ const PitchDeckPage = () => {
   const [showElevatorPitch, setShowElevatorPitch] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [editedPitch, setEditedPitch] = useState("");
+  const [copiedPitch, setCopiedPitch] = useState(false);
+
+  const copyPitchToClipboard = useCallback(() => {
+    navigator.clipboard.writeText(editedPitch);
+    setCopiedPitch(true);
+    toast.success("Elevator pitch copied to clipboard!");
+    setTimeout(() => setCopiedPitch(false), 2000);
+  }, [editedPitch]);
 
   const ideaData = location.state as {
     title: string;
