@@ -16,6 +16,7 @@ import ProblemStatementWizard from "./pages/ProblemStatementWizard";
 import PitchDeckPage from "./pages/PitchDeckPage";
 import MentorDashboard from "./pages/MentorDashboard";
 import InvestorDashboard from "./pages/InvestorDashboard";
+import IncubationHubPage from "./pages/IncubationHubPage";
 import CopyrightsPage from "./pages/CopyrightsPage";
 import TeamsPage from "./pages/TeamsPage";
 import TermsPage from "./pages/TermsPage";
