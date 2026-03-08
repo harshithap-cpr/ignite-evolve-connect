@@ -353,6 +353,108 @@ export type Database = {
         }
         Relationships: []
       }
+      incubator_registrations: {
+        Row: {
+          created_at: string | null
+          elevator_pitch: string | null
+          id: string
+          idea_id: string | null
+          incubator_id: string
+          message: string | null
+          pitch_deck_data: Json | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          elevator_pitch?: string | null
+          id?: string
+          idea_id?: string | null
+          incubator_id: string
+          message?: string | null
+          pitch_deck_data?: Json | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          elevator_pitch?: string | null
+          id?: string
+          idea_id?: string | null
+          incubator_id?: string
+          message?: string | null
+          pitch_deck_data?: Json | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incubator_registrations_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incubator_registrations_incubator_id_fkey"
+            columns: ["incubator_id"]
+            isOneToOne: false
+            referencedRelation: "incubators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incubators: {
+        Row: {
+          application_deadline: string | null
+          created_at: string | null
+          description: string | null
+          equity_requirement: string | null
+          facilities: string[] | null
+          focus_areas: string[] | null
+          funding_support: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          location: string | null
+          name: string
+          program_duration: string | null
+          website_url: string | null
+        }
+        Insert: {
+          application_deadline?: string | null
+          created_at?: string | null
+          description?: string | null
+          equity_requirement?: string | null
+          facilities?: string[] | null
+          focus_areas?: string[] | null
+          funding_support?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          location?: string | null
+          name: string
+          program_duration?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          application_deadline?: string | null
+          created_at?: string | null
+          description?: string | null
+          equity_requirement?: string | null
+          facilities?: string[] | null
+          focus_areas?: string[] | null
+          funding_support?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          location?: string | null
+          name?: string
+          program_duration?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       investor_connections: {
         Row: {
           created_at: string

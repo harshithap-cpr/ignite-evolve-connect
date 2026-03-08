@@ -23,6 +23,7 @@ const navLinks = [
 const moreLinks = [
   { label: "Submit Idea", href: "/submit-idea" },
   { label: "Idea Lab", href: "/ideas" },
+  { label: "Incubation Hub", href: "/incubation" },
   { label: "Patents", href: "/patents" },
   { label: "Copyrights", href: "/copyrights" },
   { label: "Investors", href: "/investors" },

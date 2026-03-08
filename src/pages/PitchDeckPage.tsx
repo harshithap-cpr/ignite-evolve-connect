@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import {
   Loader2, ChevronLeft, ChevronRight, Play, Pause, Volume2, VolumeX,
   Edit3, Save, Presentation, ArrowLeft, Lightbulb, Mic, FileText,
-  Target, TrendingUp, Users, Rocket, HandCoins, Sparkles, Download,
+  Target, TrendingUp, Users, Rocket, HandCoins, Sparkles, Download, Copy, ClipboardCheck,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +62,14 @@ const PitchDeckPage = () => {
   const [showElevatorPitch, setShowElevatorPitch] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [editedPitch, setEditedPitch] = useState("");
+  const [copiedPitch, setCopiedPitch] = useState(false);
+
+  const copyPitchToClipboard = useCallback(() => {
+    navigator.clipboard.writeText(editedPitch);
+    setCopiedPitch(true);
+    toast.success("Elevator pitch copied to clipboard!");
+    setTimeout(() => setCopiedPitch(false), 2000);
+  }, [editedPitch]);
 
   const ideaData = location.state as {
     title: string;
@@ -370,13 +378,18 @@ const PitchDeckPage = () => {
                     <Mic className="w-5 h-5 text-primary" />
                     <h2 className="font-display font-bold text-lg text-card-foreground">1-Minute Elevator Pitch</h2>
                   </div>
-                  <Button
-                    variant={isSpeaking ? "destructive" : "outline"}
-                    size="sm"
-                    onClick={() => speakText(editedPitch)}
-                  >
-                    {isSpeaking ? <><VolumeX className="w-4 h-4 mr-1" /> Stop</> : <><Volume2 className="w-4 h-4 mr-1" /> Listen</>}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={copyPitchToClipboard}>
+                      {copiedPitch ? <><ClipboardCheck className="w-4 h-4 mr-1" /> Copied!</> : <><Copy className="w-4 h-4 mr-1" /> Copy</>}
+                    </Button>
+                    <Button
+                      variant={isSpeaking ? "destructive" : "outline"}
+                      size="sm"
+                      onClick={() => speakText(editedPitch)}
+                    >
+                      {isSpeaking ? <><VolumeX className="w-4 h-4 mr-1" /> Stop</> : <><Volume2 className="w-4 h-4 mr-1" /> Listen</>}
+                    </Button>
+                  </div>
                 </div>
                 <Textarea
                   value={editedPitch}
