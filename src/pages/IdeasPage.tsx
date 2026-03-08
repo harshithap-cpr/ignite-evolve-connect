@@ -227,10 +227,20 @@ const IdeasPage = () => {
                       compact
                     />
 
-                    {/* View full TRL */}
-                    <div className="mt-3">
+                    {/* Actions */}
+                    <div className="mt-3 flex gap-2 flex-wrap">
                       <Button variant="ghost" size="sm" className="text-xs" onClick={() => setSelectedIdea(idea)}>
                         View Full TRL Scale →
+                      </Button>
+                      {idea.feedback && (
+                        <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => setDetailIdea(idea)}>
+                          <FileText className="w-3 h-3" /> View Full Analysis
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" className="text-xs gap-1" onClick={() => navigate("/pitch-deck", {
+                        state: { title: idea.title, problemStatement: idea.problem_statement, proposedSolution: idea.proposed_solution, analysis: idea.feedback ? (() => { try { const f = JSON.parse(idea.feedback); return { ...f, innovation_score: idea.innovation_score, feasibility_score: idea.feasibility_score, market_score: idea.market_score, overall_score: idea.overall_score, market_value: idea.market_size, verdict: idea.unique_value }; } catch { return null; } })() : null }
+                      })}>
+                        <Presentation className="w-3 h-3" /> Pitch Deck
                       </Button>
                     </div>
                   </motion.div>
