@@ -378,13 +378,18 @@ const PitchDeckPage = () => {
                     <Mic className="w-5 h-5 text-primary" />
                     <h2 className="font-display font-bold text-lg text-card-foreground">1-Minute Elevator Pitch</h2>
                   </div>
-                  <Button
-                    variant={isSpeaking ? "destructive" : "outline"}
-                    size="sm"
-                    onClick={() => speakText(editedPitch)}
-                  >
-                    {isSpeaking ? <><VolumeX className="w-4 h-4 mr-1" /> Stop</> : <><Volume2 className="w-4 h-4 mr-1" /> Listen</>}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={copyPitchToClipboard}>
+                      {copiedPitch ? <><ClipboardCheck className="w-4 h-4 mr-1" /> Copied!</> : <><Copy className="w-4 h-4 mr-1" /> Copy</>}
+                    </Button>
+                    <Button
+                      variant={isSpeaking ? "destructive" : "outline"}
+                      size="sm"
+                      onClick={() => speakText(editedPitch)}
+                    >
+                      {isSpeaking ? <><VolumeX className="w-4 h-4 mr-1" /> Stop</> : <><Volume2 className="w-4 h-4 mr-1" /> Listen</>}
+                    </Button>
+                  </div>
                 </div>
                 <Textarea
                   value={editedPitch}
