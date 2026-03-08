@@ -48,9 +48,9 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <Link to="/" className="flex items-center gap-2 font-display font-bold text-xl">
           <div className="w-8 h-8 rounded-lg overflow-hidden">
-              <img src={logo} alt="Innvo Spark Guidance" className="w-full h-full object-contain" />
+              <img src={logo} alt="Innovo Spark Guidance" className="w-full h-full object-contain" />
             </div>
-            <span className="text-foreground">Innvo Spark</span>
+            <span className="text-foreground">Innovo Spark</span>
             <span className="text-gradient-warm">Guidance</span>
           </Link>
 

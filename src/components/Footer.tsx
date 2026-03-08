@@ -10,9 +10,9 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 font-display font-bold text-xl mb-4">
               <div className="w-8 h-8 rounded-lg overflow-hidden">
-                <img src={logo} alt="Innvo Spark Guidance" className="w-full h-full object-contain" />
+                <img src={logo} alt="Innovo Spark Guidance" className="w-full h-full object-contain" />
               </div>
-              <span className="text-background">Innvo Spark Guidance</span>
+              <span className="text-background">Innovo Spark Guidance</span>
             </div>
             <p className="text-background/60 text-sm leading-relaxed max-w-sm mb-6">
               Empowering the next generation of innovators with mentorship, competitions, hackathons, and courses — all in one platform.
