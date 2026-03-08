@@ -17,6 +17,7 @@ const navLinks = [
   { label: "Hackathons", href: "/hackathons" },
   { label: "Mentors", href: "/mentors" },
   { label: "Courses", href: "/courses" },
+  { label: "Teams", href: "/teams" },
 ];
 
 const moreLinks = [

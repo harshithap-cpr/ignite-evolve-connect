@@ -15,6 +15,7 @@ import InvestorsPage from "./pages/InvestorsPage";
 import ProblemStatementWizard from "./pages/ProblemStatementWizard";
 import PitchDeckPage from "./pages/PitchDeckPage";
 import CopyrightsPage from "./pages/CopyrightsPage";
+import TeamsPage from "./pages/TeamsPage";
 import TermsPage from "./pages/TermsPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
 import NotFound from "./pages/NotFound";
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/submit-idea" element={<ProblemStatementWizard />} />
             <Route path="/pitch-deck" element={<PitchDeckPage />} />
             <Route path="/copyrights" element={<CopyrightsPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="*" element={<NotFound />} />
