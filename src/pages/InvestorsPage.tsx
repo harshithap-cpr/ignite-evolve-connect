@@ -63,7 +63,7 @@ const InvestorsPage = () => {
     const fetchInvestors = async () => {
       const { data, error } = await supabase
         .from("investors")
-        .select("*")
+        .select("id, name, title, company, bio, avatar_url, focus_areas, investment_range, investor_type, is_active, linkedin_url, website_url, location, portfolio_size, user_id, created_at")
         .eq("is_active", true)
         .order("portfolio_size", { ascending: false });
       if (!error && data) setInvestors(data as Investor[]);
