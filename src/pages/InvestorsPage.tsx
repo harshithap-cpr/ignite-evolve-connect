@@ -32,7 +32,7 @@ interface Investor {
   portfolio_size: number;
   bio: string;
   avatar_url: string;
-  email: string;
+  email?: string;
   linkedin_url: string;
   website_url: string;
   location: string;
