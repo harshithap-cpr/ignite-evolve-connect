@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useUsageGate } from "@/hooks/use-usage-gate";
 import PaywallBanner from "@/components/PaywallBanner";
+import SubscriptionGate from "@/components/SubscriptionGate";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
