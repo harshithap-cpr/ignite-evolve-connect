@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtime } from "@/hooks/use-realtime";
+import SubscriptionGate from "@/components/SubscriptionGate";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -258,6 +259,7 @@ const IdeasPage = () => {
               </div>
             )
           ) : (
+            <SubscriptionGate feature="idea leaderboard">
             <div className="space-y-4">
               {publicIdeas.length === 0 ? (
                 <div className="text-center py-20 text-muted-foreground">No public ideas yet.</div>
@@ -279,6 +281,7 @@ const IdeasPage = () => {
                 </motion.div>
               ))}
             </div>
+            </SubscriptionGate>
           )}
         </div>
       </div>

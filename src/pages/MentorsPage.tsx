@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useUsageGate } from "@/hooks/use-usage-gate";
 import PaywallBanner from "@/components/PaywallBanner";
+import SubscriptionGate from "@/components/SubscriptionGate";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -106,6 +107,7 @@ const MentorsPage = () => {
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          <SubscriptionGate feature="mentor directory">
           <PaywallBanner feature="mentor booking" remainingFree={remainingFree} canUse={canUse} isPaid={isPaid} />
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">
@@ -191,6 +193,7 @@ const MentorsPage = () => {
               ))}
             </div>
           )}
+          </SubscriptionGate>
         </div>
       </div>
 

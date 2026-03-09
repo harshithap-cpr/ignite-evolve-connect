@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import SubscriptionGate from "@/components/SubscriptionGate";
 import { useRealtime } from "@/hooks/use-realtime";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
@@ -113,6 +114,7 @@ const InvestorDashboard = () => {
           <p className="text-muted-foreground mt-1">Discover startups, manage deal flow & get AI-powered due diligence insights</p>
         </motion.div>
 
+        <SubscriptionGate feature="investor dashboard">
         <Tabs defaultValue="dealflow" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="dealflow"><TrendingUp className="h-4 w-4 mr-1" />Deal Flow</TabsTrigger>
@@ -246,6 +248,7 @@ const InvestorDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </SubscriptionGate>
       </div>
       <Footer />
     </div>

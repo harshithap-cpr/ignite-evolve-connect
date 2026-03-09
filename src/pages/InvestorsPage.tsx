@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useUsageGate } from "@/hooks/use-usage-gate";
 import PaywallBanner from "@/components/PaywallBanner";
+import SubscriptionGate from "@/components/SubscriptionGate";
 
 interface Investor {
   id: string;
@@ -128,6 +129,7 @@ const InvestorsPage = () => {
       <Navbar />
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          <SubscriptionGate feature="investor directory">
           <PaywallBanner feature="investor connection" remainingFree={remainingFree} canUse={canUse} isPaid={isPaid} />
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold font-display mb-4">
@@ -228,6 +230,7 @@ const InvestorsPage = () => {
           {!loading && filtered.length === 0 && (
             <div className="text-center py-20 text-muted-foreground">No investors found matching your search.</div>
           )}
+          </SubscriptionGate>
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import SubscriptionGate from "@/components/SubscriptionGate";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,7 @@ const MentorDashboard = () => {
           <p className="text-muted-foreground mt-1">Guide startups, manage sessions & get AI-powered insights</p>
         </motion.div>
 
+        <SubscriptionGate feature="mentor dashboard">
         <Tabs defaultValue="startups" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="startups"><Lightbulb className="h-4 w-4 mr-1" />Startups</TabsTrigger>
@@ -245,6 +247,7 @@ const MentorDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </SubscriptionGate>
       </div>
       <Footer />
     </div>

@@ -258,6 +258,51 @@ export type Database = {
         }
         Relationships: []
       }
+      idea_interests: {
+        Row: {
+          created_at: string
+          id: string
+          idea_id: string
+          investor_id: string
+          message: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idea_id: string
+          investor_id: string
+          message?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idea_id?: string
+          investor_id?: string
+          message?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idea_interests_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idea_interests_investor_id_fkey"
+            columns: ["investor_id"]
+            isOneToOne: false
+            referencedRelation: "investors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       idea_votes: {
         Row: {
           created_at: string
