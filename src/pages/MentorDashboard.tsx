@@ -114,6 +114,7 @@ const MentorDashboard = () => {
           <p className="text-muted-foreground mt-1">Guide startups, manage sessions & get AI-powered insights</p>
         </motion.div>
 
+        <SubscriptionGate feature="mentor dashboard">
         <Tabs defaultValue="startups" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="startups"><Lightbulb className="h-4 w-4 mr-1" />Startups</TabsTrigger>

@@ -114,6 +114,7 @@ const InvestorDashboard = () => {
           <p className="text-muted-foreground mt-1">Discover startups, manage deal flow & get AI-powered due diligence insights</p>
         </motion.div>
 
+        <SubscriptionGate feature="investor dashboard">
         <Tabs defaultValue="dealflow" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
             <TabsTrigger value="dealflow"><TrendingUp className="h-4 w-4 mr-1" />Deal Flow</TabsTrigger>
