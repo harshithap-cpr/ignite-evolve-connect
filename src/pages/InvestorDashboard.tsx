@@ -248,6 +248,7 @@ const InvestorDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </SubscriptionGate>
       </div>
       <Footer />
     </div>

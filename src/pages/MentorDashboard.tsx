@@ -247,6 +247,7 @@ const MentorDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        </SubscriptionGate>
       </div>
       <Footer />
     </div>
