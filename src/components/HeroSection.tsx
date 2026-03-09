@@ -14,11 +14,8 @@ const HeroSection = () => {
 
   useEffect(() => {
     const fetchCount = async () => {
-      const { count } = await supabase
-        .from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "active");
-      setSubscriberCount(count || 0);
+      const { data } = await supabase.rpc("get_active_subscriber_count");
+      setSubscriberCount(data || 0);
     };
     fetchCount();
   }, []);
