@@ -193,6 +193,7 @@ const MentorsPage = () => {
               ))}
             </div>
           )}
+          </SubscriptionGate>
         </div>
       </div>
 
