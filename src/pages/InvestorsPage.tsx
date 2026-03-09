@@ -230,6 +230,7 @@ const InvestorsPage = () => {
           {!loading && filtered.length === 0 && (
             <div className="text-center py-20 text-muted-foreground">No investors found matching your search.</div>
           )}
+          </SubscriptionGate>
         </div>
       </div>
 
