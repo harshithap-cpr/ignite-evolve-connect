@@ -90,7 +90,9 @@ const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
     setTxnSubmitting(false);
     if (error) { toast.error("Failed to submit"); return; }
     setPaymentSubmitted(true);
-    toast.success("Payment submitted! We'll verify & activate within 24 hours. 🎉");
+    toast.success("Payment submitted! Features unlocked — we'll verify in the background. 🎉");
+    // Reload to refresh subscription state and unlock features
+    setTimeout(() => window.location.reload(), 1500);
   };
 
   // Poll for subscription activation after payment submission
