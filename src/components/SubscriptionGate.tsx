@@ -319,5 +319,6 @@ const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
       {children}
     </>
   );
+};
 
 export default SubscriptionGate;
