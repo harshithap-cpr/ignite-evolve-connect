@@ -309,7 +309,15 @@ const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
     );
   }
 
-  return <>{children}</>;
-};
+  return (
+    <>
+      {isPending && (
+        <div className="mb-4 p-3 bg-accent/10 border border-accent/30 rounded-xl text-center text-sm text-muted-foreground">
+          ⏳ Payment verification pending — you have full access while we confirm.
+        </div>
+      )}
+      {children}
+    </>
+  );
 
 export default SubscriptionGate;
