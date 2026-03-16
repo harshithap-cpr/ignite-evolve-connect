@@ -56,8 +56,10 @@ export const useSubscription = () => {
     fetchSub();
   }, [user]);
 
-  const isPaid = subscription?.plan === "pro" || subscription?.plan === "premium";
+  const isPaid = (subscription?.plan === "pro" || subscription?.plan === "premium") && 
+    (subscription?.status === "active" || subscription?.status === "pending");
   const plan: SubscriptionPlan = (subscription?.plan as SubscriptionPlan) || "free";
+  const isPending = subscription?.status === "pending";
 
   return { subscription, loading, isPaid, plan };
 };
