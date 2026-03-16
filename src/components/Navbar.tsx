@@ -58,6 +58,16 @@ const Navbar = () => {
             <span className="text-gradient-warm">Guidance</span>
           </Link>
 
+        <div className="hidden md:flex items-center gap-3">
+          {!user && (
+            <Button variant="hero" size="sm" asChild>
+              <Link to="/auth">
+                <Sparkles className="w-4 h-4 mr-1" /> Sign In
+              </Link>
+            </Button>
+          )}
+        </div>
+
         <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <NavItem key={link.label} {...link} />
@@ -77,7 +87,7 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          {user ? (
+          {user && (
             <>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className="w-4 h-4" />
@@ -85,15 +95,6 @@ const Navbar = () => {
               </div>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="w-4 h-4 mr-1" /> Sign Out
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/auth">Log in</Link>
-              </Button>
-              <Button variant="hero" size="sm" asChild>
-                <Link to="/auth">Get Started</Link>
               </Button>
             </>
           )}
@@ -123,20 +124,18 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              {!user && (
+                <Button variant="hero" size="lg" className="w-full" asChild>
+                  <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                    <Sparkles className="w-4 h-4 mr-1" /> Sign In / Get Started
+                  </Link>
+                </Button>
+              )}
               <div className="flex gap-3 pt-2">
-                {user ? (
+                {user && (
                   <Button variant="ghost" size="sm" className="flex-1" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
                     Sign Out
                   </Button>
-                ) : (
-                  <>
-                    <Button variant="ghost" size="sm" className="flex-1" asChild>
-                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Log in</Link>
-                    </Button>
-                    <Button variant="hero" size="sm" className="flex-1" asChild>
-                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Get Started</Link>
-                    </Button>
-                  </>
                 )}
               </div>
             </div>
