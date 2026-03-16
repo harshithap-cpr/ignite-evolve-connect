@@ -23,8 +23,9 @@ export const useSubscription = () => {
       return;
     }
 
-    const fetch = async () => {
-      const { data } = await supabase
+    const fetchSub = async () => {
+      // Check active first, then pending (optimistic access after payment submission)
+      const { data: active } = await supabase
         .from("subscriptions")
         .select("*")
         .eq("user_id", user.id)
@@ -33,15 +34,32 @@ export const useSubscription = () => {
         .limit(1)
         .maybeSingle();
 
-      setSubscription(data as Subscription | null);
+      if (active) {
+        setSubscription(active as Subscription);
+        setLoading(false);
+        return;
+      }
+
+      const { data: pending } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      setSubscription(pending as Subscription | null);
       setLoading(false);
     };
 
-    fetch();
+    fetchSub();
   }, [user]);
 
-  const isPaid = subscription?.plan === "pro" || subscription?.plan === "premium";
+  const isPaid = (subscription?.plan === "pro" || subscription?.plan === "premium") && 
+    (subscription?.status === "active" || subscription?.status === "pending");
   const plan: SubscriptionPlan = (subscription?.plan as SubscriptionPlan) || "free";
+  const isPending = subscription?.status === "pending";
 
-  return { subscription, loading, isPaid, plan };
+  return { subscription, loading, isPaid, isPending, plan };
 };

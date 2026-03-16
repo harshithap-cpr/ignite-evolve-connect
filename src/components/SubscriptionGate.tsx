@@ -51,7 +51,7 @@ interface SubscriptionGateProps {
 
 const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
   const { user } = useAuth();
-  const { isPaid, loading } = useSubscription();
+  const { isPaid, isPending, loading } = useSubscription();
   const navigate = useNavigate();
   const [showPlans, setShowPlans] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
@@ -90,33 +90,12 @@ const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
     setTxnSubmitting(false);
     if (error) { toast.error("Failed to submit"); return; }
     setPaymentSubmitted(true);
-    toast.success("Payment submitted! We'll verify & activate within 24 hours. 🎉");
+    toast.success("Payment submitted! Features unlocked — we'll verify in the background. 🎉");
+    // Reload to refresh subscription state and unlock features
+    setTimeout(() => window.location.reload(), 1500);
   };
 
-  // Poll for subscription activation after payment submission
-  useEffect(() => {
-    if (!paymentSubmitted || !user) return;
-    setCheckingStatus(true);
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("status")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .limit(1)
-        .maybeSingle();
-      if (data) {
-        toast.success("🎉 Subscription activated! Enjoy full access.");
-        setCheckingStatus(false);
-        setPaymentSubmitted(false);
-        setSelectedPlan(null);
-        setShowPlans(false);
-        // Force page reload to refresh subscription state
-        window.location.reload();
-      }
-    }, 10000); // check every 10 seconds
-    return () => clearInterval(interval);
-  }, [paymentSubmitted, user]);
+  // No need for polling — features unlock immediately after submission
 
   const handleClose = useCallback(() => {
     setSelectedPlan(null);
@@ -330,7 +309,16 @@ const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {isPending && (
+        <div className="mb-4 p-3 bg-accent/10 border border-accent/30 rounded-xl text-center text-sm text-muted-foreground">
+          ⏳ Payment verification pending — you have full access while we confirm.
+        </div>
+      )}
+      {children}
+    </>
+  );
 };
 
 export default SubscriptionGate;
