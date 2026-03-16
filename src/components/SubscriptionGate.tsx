@@ -95,30 +95,7 @@ const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
     setTimeout(() => window.location.reload(), 1500);
   };
 
-  // Poll for subscription activation after payment submission
-  useEffect(() => {
-    if (!paymentSubmitted || !user) return;
-    setCheckingStatus(true);
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("status")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .limit(1)
-        .maybeSingle();
-      if (data) {
-        toast.success("🎉 Subscription activated! Enjoy full access.");
-        setCheckingStatus(false);
-        setPaymentSubmitted(false);
-        setSelectedPlan(null);
-        setShowPlans(false);
-        // Force page reload to refresh subscription state
-        window.location.reload();
-      }
-    }, 10000); // check every 10 seconds
-    return () => clearInterval(interval);
-  }, [paymentSubmitted, user]);
+  // No need for polling — features unlock immediately after submission
 
   const handleClose = useCallback(() => {
     setSelectedPlan(null);
