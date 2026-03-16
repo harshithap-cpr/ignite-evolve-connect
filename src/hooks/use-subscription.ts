@@ -53,7 +53,7 @@ export const useSubscription = () => {
       setLoading(false);
     };
 
-    fetch();
+    fetchSub();
   }, [user]);
 
   const isPaid = subscription?.plan === "pro" || subscription?.plan === "premium";
