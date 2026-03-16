@@ -51,7 +51,7 @@ interface SubscriptionGateProps {
 
 const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
   const { user } = useAuth();
-  const { isPaid, loading } = useSubscription();
+  const { isPaid, isPending, loading } = useSubscription();
   const navigate = useNavigate();
   const [showPlans, setShowPlans] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
