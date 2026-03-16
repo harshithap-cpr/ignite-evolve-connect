@@ -61,5 +61,5 @@ export const useSubscription = () => {
   const plan: SubscriptionPlan = (subscription?.plan as SubscriptionPlan) || "free";
   const isPending = subscription?.status === "pending";
 
-  return { subscription, loading, isPaid, plan };
+  return { subscription, loading, isPaid, isPending, plan };
 };
