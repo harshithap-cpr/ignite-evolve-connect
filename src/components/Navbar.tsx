@@ -124,20 +124,18 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              {!user && (
+                <Button variant="hero" size="lg" className="w-full" asChild>
+                  <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                    <Sparkles className="w-4 h-4 mr-1" /> Sign In / Get Started
+                  </Link>
+                </Button>
+              )}
               <div className="flex gap-3 pt-2">
-                {user ? (
+                {user && (
                   <Button variant="ghost" size="sm" className="flex-1" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
                     Sign Out
                   </Button>
-                ) : (
-                  <>
-                    <Button variant="ghost" size="sm" className="flex-1" asChild>
-                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Log in</Link>
-                    </Button>
-                    <Button variant="hero" size="sm" className="flex-1" asChild>
-                      <Link to="/auth" onClick={() => setMobileOpen(false)}>Get Started</Link>
-                    </Button>
-                  </>
                 )}
               </div>
             </div>
