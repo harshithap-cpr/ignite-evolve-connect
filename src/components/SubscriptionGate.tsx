@@ -311,7 +311,12 @@ const SubscriptionGate = ({ children, feature }: SubscriptionGateProps) => {
 
   return (
     <>
-      {isPending && (
+      {isTrial && (
+        <div className="mb-4 p-3 bg-primary/10 border border-primary/30 rounded-xl text-center text-sm text-muted-foreground">
+          🎉 Free trial — <strong>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left</strong>. Subscribe to keep access after the trial ends.
+        </div>
+      )}
+      {isPending && !isTrial && (
         <div className="mb-4 p-3 bg-accent/10 border border-accent/30 rounded-xl text-center text-sm text-muted-foreground">
           ⏳ Payment verification pending — you have full access while we confirm.
         </div>
