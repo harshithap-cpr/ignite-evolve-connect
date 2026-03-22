@@ -30,7 +30,7 @@ export const useSubscription = () => {
   const [loading, setLoading] = useState(true);
 
   const inTrial = isWithinTrial(user);
-
+  const isLifetimeFree = LIFETIME_FREE_EMAILS.includes(user?.email?.toLowerCase() || "");
   useEffect(() => {
     if (!user) {
       setSubscription(null);
