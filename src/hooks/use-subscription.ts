@@ -13,6 +13,8 @@ interface Subscription {
 
 const FREE_TRIAL_DAYS = 3;
 
+const LIFETIME_FREE_EMAILS = ["harshitha.p@jkkn.ac.in"];
+
 const isWithinTrial = (user: { created_at?: string } | null): boolean => {
   if (!user?.created_at) return false;
   const created = new Date(user.created_at);
@@ -28,7 +30,7 @@ export const useSubscription = () => {
   const [loading, setLoading] = useState(true);
 
   const inTrial = isWithinTrial(user);
-
+  const isLifetimeFree = LIFETIME_FREE_EMAILS.includes(user?.email?.toLowerCase() || "");
   useEffect(() => {
     if (!user) {
       setSubscription(null);
@@ -70,12 +72,12 @@ export const useSubscription = () => {
 
   const hasActiveSub = (subscription?.plan === "pro" || subscription?.plan === "premium") && 
     (subscription?.status === "active" || subscription?.status === "pending");
-  const isPaid = hasActiveSub || inTrial;
+  const isPaid = hasActiveSub || inTrial || isLifetimeFree;
   const plan: SubscriptionPlan = hasActiveSub
     ? (subscription?.plan as SubscriptionPlan)
-    : inTrial ? "pro" : "free";
+    : (inTrial || isLifetimeFree) ? "premium" : "free";
   const isPending = subscription?.status === "pending";
-  const isTrial = inTrial && !hasActiveSub;
+  const isTrial = (inTrial && !hasActiveSub && !isLifetimeFree);
 
   const trialDaysLeft = user?.created_at
     ? Math.max(0, Math.ceil(FREE_TRIAL_DAYS - (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)))
