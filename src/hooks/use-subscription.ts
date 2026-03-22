@@ -11,10 +11,23 @@ interface Subscription {
   expires_at: string | null;
 }
 
+const FREE_TRIAL_DAYS = 3;
+
+const isWithinTrial = (user: { created_at?: string } | null): boolean => {
+  if (!user?.created_at) return false;
+  const created = new Date(user.created_at);
+  const now = new Date();
+  const diffMs = now.getTime() - created.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays <= FREE_TRIAL_DAYS;
+};
+
 export const useSubscription = () => {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const inTrial = isWithinTrial(user);
 
   useEffect(() => {
     if (!user) {
@@ -24,7 +37,6 @@ export const useSubscription = () => {
     }
 
     const fetchSub = async () => {
-      // Check active first, then pending (optimistic access after payment submission)
       const { data: active } = await supabase
         .from("subscriptions")
         .select("*")
@@ -56,10 +68,18 @@ export const useSubscription = () => {
     fetchSub();
   }, [user]);
 
-  const isPaid = (subscription?.plan === "pro" || subscription?.plan === "premium") && 
+  const hasActiveSub = (subscription?.plan === "pro" || subscription?.plan === "premium") && 
     (subscription?.status === "active" || subscription?.status === "pending");
-  const plan: SubscriptionPlan = (subscription?.plan as SubscriptionPlan) || "free";
+  const isPaid = hasActiveSub || inTrial;
+  const plan: SubscriptionPlan = hasActiveSub
+    ? (subscription?.plan as SubscriptionPlan)
+    : inTrial ? "pro" : "free";
   const isPending = subscription?.status === "pending";
+  const isTrial = inTrial && !hasActiveSub;
 
-  return { subscription, loading, isPaid, isPending, plan };
+  const trialDaysLeft = user?.created_at
+    ? Math.max(0, Math.ceil(FREE_TRIAL_DAYS - (Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  return { subscription, loading, isPaid, isPending, plan, isTrial, trialDaysLeft };
 };
