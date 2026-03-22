@@ -13,6 +13,8 @@ interface Subscription {
 
 const FREE_TRIAL_DAYS = 3;
 
+const LIFETIME_FREE_EMAILS = ["harshitha.p@jkkn.ac.in"];
+
 const isWithinTrial = (user: { created_at?: string } | null): boolean => {
   if (!user?.created_at) return false;
   const created = new Date(user.created_at);
