@@ -112,8 +112,11 @@ const ProblemStatementWizard = () => {
   const qrCodeUrl = selectedPlan ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiPaymentLink)}` : "";
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { isPaid, plan, loading: subLoading } = useSubscription();
-  const { canUse: canAnalyze, remainingFree } = useUsageGate("ai_analysis");
+  const { isPaid: _isPaid, plan, loading: subLoading } = useSubscription();
+  const isPaid = true; // AI analyzer is free for everyone
+  const { canUse: _canAnalyze, remainingFree: _remainingFree } = useUsageGate("ai_analysis");
+  const canAnalyze = true; // Free for all
+  const remainingFree = 999;
 
   const canSubmit = title.length > 0 && problemStatement.length > 10 && proposedSolution.length > 10;
 
