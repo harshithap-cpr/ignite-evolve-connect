@@ -72,13 +72,7 @@ serve(async (req) => {
       });
     }
 
-    // Check usage gate server-side
-    const canUse = await checkUsageGate(auth.supabase, auth.userId, "analyze-idea");
-    if (!canUse) {
-      return new Response(JSON.stringify({ error: "Free usage limit reached. Please upgrade to continue." }), {
-        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // AI analyzer is free for everyone - no usage gate
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
